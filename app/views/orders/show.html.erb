@@ -1,0 +1,64 @@
+<div class="container py-4 py-lg-5">
+  <section class="order-hero fade-in-up">
+    <div>
+      <p class="eyebrow mb-1">Acompanhamento</p>
+      <h1 class="h3 mb-1"><%= ui_icon(:receipt) %> Pedido #<%= @order.id %></h1>
+      <p class="text-secondary mb-0">
+        <%= @order.order_type_table? ? "Pedido de mesa #{ @order.table_number }" : "Pedido #{@order.human_order_type}" %> com status em tempo real.
+      </p>
+    </div>
+    <span class="status-pill status-<%= @order.status %>"><%= ui_icon(:clock) %> <%= @order.human_status %></span>
+  </section>
+
+  <section class="row g-3 mt-2">
+    <div class="col-12 col-md-4">
+      <article class="metric-card fade-in-up" style="animation-delay:.05s">
+        <small>Posição na fila</small>
+        <strong><%= ui_icon(:list) %> <%= @order.queue_position || '-' %></strong>
+      </article>
+    </div>
+    <div class="col-12 col-md-4">
+      <article class="metric-card fade-in-up" style="animation-delay:.1s">
+        <small>Tempo estimado de preparo</small>
+        <strong><%= ui_icon(:clock) %> <%= @order.eta_minutes || '-' %> min</strong>
+      </article>
+    </div>
+    <div class="col-12 col-md-4">
+      <article class="metric-card fade-in-up" style="animation-delay:.15s">
+        <small>Total</small>
+        <strong><%= ui_icon(:receipt) %> <%= money(@order.total_cents) %></strong>
+      </article>
+    </div>
+  </section>
+
+  <section class="hero-card mt-3 fade-in-up">
+    <% status_copy = case @order.status
+       when "received" then "Recebemos seu pedido e ele está na fila."
+       when "in_production" then "Seu pedido está em preparo."
+       when "ready" then @order.order_type_table? ? "Seu pedido está pronto para servir na mesa." : "Seu pedido está pronto para retirada/entrega."
+       when "delivered" then "Pedido finalizado. Obrigado!"
+       when "canceled" then "Pedido cancelado."
+       else "Aguardando confirmação do pedido."
+       end %>
+    <p class="mb-0"><strong><%= status_copy %></strong></p>
+  </section>
+
+  <section class="queue-list mt-3">
+    <% @order.order_items.each do |item| %>
+      <article class="queue-card fade-in-up">
+        <div class="queue-left">
+          <span class="queue-rank"><%= item.quantity %>x</span>
+          <div>
+            <h2 class="h6 mb-1"><%= ui_icon(:box) %> <%= item.product&.name || item.combo&.name %></h2>
+            <% if item.notes.present? %>
+              <p class="text-secondary mb-0"><strong>Observação:</strong> <%= item.notes %></p>
+            <% end %>
+          </div>
+        </div>
+        <div class="queue-right">
+          <span class="price-chip"><%= money(item.total_cents) %></span>
+        </div>
+      </article>
+    <% end %>
+  </section>
+</div>

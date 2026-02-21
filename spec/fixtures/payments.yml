@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  order: 
+  status: 1
+  amount_cents: 1
+  provider: MyString
+  provider_reference: MyString
+  provider_event_id: MyString
+  approved_at: 2026-02-21 03:19:51
+  refused_reason: MyString
+  raw_payload: MyText
+
+two:
+  order: 
+  status: 1
+  amount_cents: 1
+  provider: MyString
+  provider_reference: MyString
+  provider_event_id: MyString
+  approved_at: 2026-02-21 03:19:51
+  refused_reason: MyString
+  raw_payload: MyText

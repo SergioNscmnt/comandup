@@ -1,0 +1,38 @@
+<div class="container py-4 py-lg-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-5">
+      <section class="hero-card fade-in-up">
+        <p class="eyebrow mb-1">Área Administrativa</p>
+        <h1 class="h3 mb-3"><%= ui_icon(:login) %> Entrar no painel</h1>
+        <p class="text-secondary mb-4">A parte administrativa exige autenticação para gerenciar fila e produção.</p>
+
+        <% if flash[:alert].present? %>
+          <div class="alert alert-danger"><%= flash[:alert] %></div>
+        <% end %>
+
+        <%= form_with url: admin_login_path, method: :post, local: true do |f| %>
+          <div class="mb-3">
+            <%= f.label :email, class: "form-label" do %>
+              <%= ui_icon(:box) %> Email
+            <% end %>
+            <%= f.email_field :email, class: "form-control", required: true, autofocus: true %>
+          </div>
+
+          <div class="mb-4">
+            <%= f.label :password, class: "form-label" do %>
+              <%= ui_icon(:check) %> Senha
+            <% end %>
+            <%= f.password_field :password, class: "form-control", required: true %>
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-brand icon-btn">
+              <%= ui_icon(:login) %>
+              <span>Entrar</span>
+            </button>
+          </div>
+        <% end %>
+      </section>
+    </div>
+  </div>
+</div>

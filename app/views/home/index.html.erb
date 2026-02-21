@@ -1,0 +1,47 @@
+<div class="container py-4 py-lg-5">
+  <section class="hero-card fade-in-up">
+    <p class="eyebrow mb-2">Operação em tempo real</p>
+    <h1 class="display-6 mb-3">Command center para comandas, fila FIFO e pagamento no app</h1>
+    <p class="text-secondary mb-4">
+      Interface otimizada para cliente e administração com tempo estimado de preparo dinâmico, jobs em background e atualização ao vivo.
+    </p>
+
+    <div class="hero-actions">
+      <%= link_to products_path, class: "btn btn-brand icon-btn" do %>
+        <%= ui_icon(:box) %>
+        <span>Explorar produtos</span>
+      <% end %>
+      <%= link_to admin_queue_path, class: "btn btn-outline-brand icon-btn" do %>
+        <%= ui_icon(:list) %>
+        <span>Abrir fila admin</span>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="row g-3 mt-1">
+    <div class="col-6 col-lg-3">
+      <article class="metric-card fade-in-up" style="animation-delay:.05s">
+        <small>Stack</small>
+        <strong><%= ui_icon(:box) %> Rails 7.1</strong>
+      </article>
+    </div>
+    <div class="col-6 col-lg-3">
+      <article class="metric-card fade-in-up" style="animation-delay:.1s">
+        <small>Banco</small>
+        <strong><%= ui_icon(:receipt) %> MariaDB 11</strong>
+      </article>
+    </div>
+    <div class="col-6 col-lg-3">
+      <article class="metric-card fade-in-up" style="animation-delay:.15s">
+        <small>Fila</small>
+        <strong><%= ui_icon(:list) %> Sidekiq 7</strong>
+      </article>
+    </div>
+    <div class="col-6 col-lg-3">
+      <article class="metric-card fade-in-up" style="animation-delay:.2s">
+        <small>Tempo real</small>
+        <strong><%= ui_icon(:clock) %> Hotwire</strong>
+      </article>
+    </div>
+  </section>
+</div>

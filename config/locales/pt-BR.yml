@@ -1,0 +1,59 @@
+pt-BR:
+  hello: "Olá mundo"
+
+  nav:
+    cart: "Carrinho"
+
+  date:
+    day_names: [domingo, segunda-feira, terça-feira, quarta-feira, quinta-feira, sexta-feira, sábado]
+    abbr_day_names: [dom, seg, ter, qua, qui, sex, sáb]
+    month_names: [~, janeiro, fevereiro, março, abril, maio, junho, julho, agosto, setembro, outubro, novembro, dezembro]
+    abbr_month_names: [~, jan, fev, mar, abr, mai, jun, jul, ago, set, out, nov, dez]
+    formats:
+      default: "%d/%m/%Y"
+      short: "%d/%m"
+      long: "%d de %B de %Y"
+
+  time:
+    formats:
+      default: "%d/%m/%Y %H:%M"
+      short: "%d/%m/%Y %H:%M"
+      long: "%d de %B de %Y às %H:%M"
+
+  number:
+    currency:
+      format:
+        format: "%u %n"
+        unit: "R$"
+        separator: ","
+        delimiter: "."
+        precision: 2
+
+  activerecord:
+    models:
+      user:
+        one: "Usuário"
+        other: "Usuários"
+      order:
+        one: "Pedido"
+        other: "Pedidos"
+      order_item:
+        one: "Item do pedido"
+        other: "Itens do pedido"
+      product:
+        one: "Produto"
+        other: "Produtos"
+    attributes:
+      order:
+        statuses:
+          draft: "Rascunho"
+          received: "Recebido"
+          in_production: "Em preparo"
+          ready: "Pronto"
+          delivered: "Finalizado"
+          canceled: "Cancelado"
+          payment_failed: "Falha no pagamento"
+        order_types:
+          table: "Mesa"
+          pickup: "Retirada"
+          delivery: "Delivery"

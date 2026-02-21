@@ -1,0 +1,89 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bash -lc "bundle exec rails db:create db:migrate && bundle exec rails server -b 0.0.0.0 -p 3000"
+    ports:
+      - "3000:3000"
+    environment:
+      RAILS_ENV: development
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USERNAME: comand_up
+      DB_PASSWORD: comand_up_password
+      DB_NAME_DEVELOPMENT: comand_up_development
+      DB_NAME_TEST: comand_up_development
+      DB_HOST_TEST: db
+      REDIS_URL: redis://redis:6379/0
+      REDIS_CACHE_URL: redis://redis:6379/2
+      LOG_JSON: "true"
+    volumes:
+      - .:/rails
+      - bundle_data:/usr/local/bundle
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  sidekiq:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bundle exec sidekiq
+    environment:
+      RAILS_ENV: development
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USERNAME: comand_up
+      DB_PASSWORD: comand_up_password
+      DB_NAME_DEVELOPMENT: comand_up_development
+      DB_NAME_TEST: comand_up_development
+      DB_HOST_TEST: db
+      REDIS_URL: redis://redis:6379/0
+      REDIS_CACHE_URL: redis://redis:6379/2
+      LOG_JSON: "true"
+    volumes:
+      - .:/rails
+      - bundle_data:/usr/local/bundle
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: comand_up_development
+      MARIADB_USER: comand_up
+      MARIADB_PASSWORD: comand_up_password
+      MARIADB_ROOT_PASSWORD: root_password
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mariadb_data:
+  redis_data:
+  bundle_data:

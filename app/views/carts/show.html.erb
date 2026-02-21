@@ -1,0 +1,114 @@
+<div class="container py-4 py-lg-5">
+  <section class="section-head fade-in-up d-flex flex-wrap justify-content-between align-items-end gap-3">
+    <div>
+      <p class="eyebrow mb-1">Carrinho</p>
+      <h1 class="h2 mb-1"><%= ui_icon(:cart) %> Seu pedido</h1>
+      <p class="text-secondary mb-0">Confira os itens antes de finalizar.</p>
+    </div>
+
+    <% if @items.any? %>
+      <%= button_to cart_path, method: :delete, class: "btn btn-outline-brand icon-btn" do %>
+        <%= ui_icon(:trash) %>
+        <span>Limpar carrinho</span>
+      <% end %>
+    <% end %>
+  </section>
+
+  <% if @items.empty? %>
+    <section class="hero-card mt-3 fade-in-up">
+      <h2 class="h5 mb-2"><%= ui_icon(:x) %> Carrinho vazio</h2>
+      <p class="text-secondary mb-3">Adicione produtos para criar seu pedido.</p>
+      <%= link_to products_path, class: "btn btn-brand icon-btn" do %>
+        <%= ui_icon(:box) %>
+        <span>Ver produtos</span>
+      <% end %>
+    </section>
+  <% else %>
+    <section class="queue-list mt-3">
+      <% @items.each do |item| %>
+        <article class="queue-card fade-in-up">
+          <div class="queue-left">
+            <span class="queue-rank"><%= item[:quantity] %>x</span>
+            <div>
+              <h2 class="h6 mb-1"><%= ui_icon(:box) %> <%= item[:product].name %></h2>
+              <p class="text-secondary mb-0"><%= money(item[:unit_cents]) %> cada</p>
+            </div>
+          </div>
+
+          <div class="queue-right">
+            <span class="price-chip"><%= money(item[:total_cents]) %></span>
+            <div class="d-flex gap-1">
+              <%= button_to cart_path(product_id: item[:product].id, operation: "decrease"), method: :patch, class: "btn btn-sm btn-outline-brand cart-qty-btn icon-btn" do %>
+                <%= ui_icon(:dash) %>
+              <% end %>
+              <%= button_to cart_path(product_id: item[:product].id, operation: "add"), method: :patch, class: "btn btn-sm btn-outline-brand cart-qty-btn icon-btn" do %>
+                <%= ui_icon(:plus) %>
+              <% end %>
+              <%= button_to cart_path(product_id: item[:product].id, operation: "remove"), method: :patch, class: "btn btn-sm btn-outline-danger icon-btn" do %>
+                <%= ui_icon(:trash) %>
+                <span>Remover</span>
+              <% end %>
+            </div>
+          </div>
+        </article>
+
+        <article class="queue-card fade-in-up mt-2">
+          <%= form_with url: cart_path, method: :patch, local: true, class: "w-100" do |f| %>
+            <%= hidden_field_tag :product_id, item[:product].id %>
+            <%= hidden_field_tag :operation, "note" %>
+            <div class="d-flex flex-wrap gap-2 align-items-end justify-content-between">
+              <div class="flex-grow-1">
+                <label class="form-label mb-1">Observação do item</label>
+                <%= text_field_tag :note, item[:note], class: "form-control", maxlength: 255, placeholder: "Ex: sem cebola, ponto da carne, sem gelo..." %>
+              </div>
+              <%= f.submit "Salvar observação", class: "btn btn-sm btn-outline-brand icon-btn" %>
+            </div>
+          <% end %>
+        </article>
+      <% end %>
+    </section>
+
+    <section class="hero-card mt-3 fade-in-up">
+      <%= form_with url: orders_path, method: :post, local: true do |f| %>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <div>
+            <p class="mb-1 text-secondary"><%= ui_icon(:receipt) %> Subtotal</p>
+            <h2 class="h4 mb-0"><%= money(@subtotal_cents) %></h2>
+          </div>
+        </div>
+
+        <hr>
+        <p class="mb-2"><strong>Como você quer receber?</strong></p>
+        <div class="d-flex flex-wrap gap-3 mb-3">
+          <label class="d-flex align-items-center gap-2">
+            <%= radio_button_tag :order_type, "table", true %>
+            <span>Mesa (sem login)</span>
+          </label>
+          <label class="d-flex align-items-center gap-2">
+            <%= radio_button_tag :order_type, "pickup", false %>
+            <span>Retirada (com Google)</span>
+          </label>
+          <label class="d-flex align-items-center gap-2">
+            <%= radio_button_tag :order_type, "delivery", false %>
+            <span>Delivery (com Google)</span>
+          </label>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label mb-1">Mesa (obrigatório para pedido de mesa)</label>
+          <%= text_field_tag :table_number, "", class: "form-control", placeholder: "Ex: Mesa 7" %>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label mb-1">Endereço de entrega (somente delivery)</label>
+          <%= text_field_tag :delivery_address, "", class: "form-control", placeholder: "Rua, número, bairro" %>
+        </div>
+
+        <%= f.button class: "btn btn-brand icon-btn" do %>
+          <%= ui_icon(:check) %>
+          <span>Finalizar pedido</span>
+        <% end %>
+      <% end %>
+    </section>
+  <% end %>
+</div>

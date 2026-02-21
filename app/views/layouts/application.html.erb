@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ComandUp</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body>
+    <div class="page-bg"></div>
+
+    <header class="app-header">
+      <div class="container app-nav">
+        <%= link_to root_path, class: "brand" do %>
+          <span class="brand-dot"></span>
+          <span>ComandUp</span>
+        <% end %>
+
+        <nav class="nav-links">
+          <%= link_to products_path, class: "icon-link" do %>
+            <%= ui_icon(:box) %>
+            <span>Produtos</span>
+          <% end %>
+
+          <%= link_to cart_path, class: "cart-link icon-link" do %>
+            <%= ui_icon(:cart) %>
+            <span><%= t("nav.cart") %></span>
+            <span class="cart-badge"><%= cart_count %></span>
+            <span class="cart-total"><%= money(cart_total_cents) %></span>
+          <% end %>
+
+          <% if current_customer %>
+            <%= link_to orders_path, class: "icon-link" do %>
+              <%= ui_icon(:receipt) %>
+              <span>Meus pedidos</span>
+            <% end %>
+            <%= button_to customer_logout_path, method: :delete, class: "btn btn-sm btn-outline-brand nav-logout" do %>
+              <%= ui_icon(:logout) %>
+              <span>Sair cliente</span>
+            <% end %>
+          <% else %>
+            <%= link_to customer_login_path, class: "icon-link" do %>
+              <%= ui_icon(:login) %>
+              <span>Login Cliente</span>
+            <% end %>
+          <% end %>
+
+          <% if current_admin %>
+            <%= link_to admin_queue_path, class: "icon-link" do %>
+              <%= ui_icon(:list) %>
+              <span>Fila Admin</span>
+            <% end %>
+            <%= button_to admin_logout_path, method: :delete, class: "btn btn-sm btn-outline-brand nav-logout" do %>
+              <%= ui_icon(:logout) %>
+              <span>Sair</span>
+            <% end %>
+          <% else %>
+            <%= link_to admin_login_path, class: "icon-link" do %>
+              <%= ui_icon(:login) %>
+              <span>Admin Login</span>
+            <% end %>
+          <% end %>
+        </nav>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <% if notice.present? %>
+        <div class="container pt-3">
+          <div class="alert alert-success mb-0"><%= notice %></div>
+        </div>
+      <% end %>
+      <% if alert.present? %>
+        <div class="container pt-3">
+          <div class="alert alert-danger mb-0"><%= alert %></div>
+        </div>
+      <% end %>
+      <%= yield %>
+    </main>
+  </body>
+</html>

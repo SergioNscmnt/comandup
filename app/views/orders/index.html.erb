@@ -1,0 +1,41 @@
+<div class="container py-4 py-lg-5">
+  <section class="section-head fade-in-up d-flex justify-content-between align-items-end gap-3 flex-wrap">
+    <div>
+      <p class="eyebrow mb-1">Minha conta</p>
+      <h1 class="h2 mb-1"><%= ui_icon(:receipt) %> Meus pedidos</h1>
+      <p class="text-secondary mb-0">Acompanhe seus pedidos de retirada e delivery.</p>
+    </div>
+  </section>
+
+  <% if @orders.empty? %>
+    <section class="hero-card mt-3 fade-in-up">
+      <h2 class="h5 mb-2"><%= ui_icon(:x) %> Nenhum pedido encontrado</h2>
+      <p class="text-secondary mb-3">Você ainda não criou pedidos vinculados ao seu login.</p>
+      <%= link_to products_path, class: "btn btn-brand icon-btn" do %>
+        <%= ui_icon(:box) %>
+        <span>Explorar cardápio</span>
+      <% end %>
+    </section>
+  <% else %>
+    <section class="queue-list mt-3">
+      <% @orders.each do |order| %>
+        <article class="queue-card fade-in-up">
+          <div class="queue-left">
+            <span class="queue-rank">#<%= order.id %></span>
+            <div>
+              <h2 class="h6 mb-1"><%= ui_icon(:receipt) %> <%= order.human_order_type %></h2>
+              <p class="text-secondary mb-0"><%= l(order.created_at, format: :short) %></p>
+            </div>
+          </div>
+          <div class="queue-right">
+            <span class="status-pill status-<%= order.status %>"><%= order.human_status %></span>
+            <%= link_to order_path(order), class: "btn btn-sm btn-outline-brand icon-btn" do %>
+              <%= ui_icon(:list) %>
+              <span>Acompanhar</span>
+            <% end %>
+          </div>
+        </article>
+      <% end %>
+    </section>
+  <% end %>
+</div>

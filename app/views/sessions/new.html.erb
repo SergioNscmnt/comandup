@@ -1,0 +1,24 @@
+<div class="container py-4 py-lg-5">
+  <section class="hero-card fade-in-up mx-auto" style="max-width:680px;">
+    <p class="eyebrow mb-1">Acesso do cliente</p>
+    <h1 class="h3 mb-2"><%= ui_icon(:login) %> Entrar para Retirada ou Delivery</h1>
+    <p class="text-secondary mb-4">Use seu e-mail Google para acompanhar pedidos de retirada e delivery em qualquer dispositivo.</p>
+
+    <%= form_with url: customer_google_login_path, method: :post, local: true do %>
+      <div class="mb-2">
+        <label class="form-label mb-1">Nome</label>
+        <%= text_field_tag :name, "", class: "form-control", placeholder: "Seu nome" %>
+      </div>
+      <div class="mb-3">
+        <label class="form-label mb-1">E-mail Google</label>
+        <%= email_field_tag :email, "", class: "form-control", placeholder: "voce@gmail.com", required: true %>
+      </div>
+      <%= button_tag type: :submit, class: "btn btn-brand icon-btn" do %>
+        <%= ui_icon(:login) %>
+        <span>Entrar com Google (modo dev)</span>
+      <% end %>
+    <% end %>
+
+    <p class="text-secondary mt-3 mb-0">Pedidos de mesa continuam sem login.</p>
+  </section>
+</div>

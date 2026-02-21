@@ -1,6 +1,6 @@
 # ComandUp
 
-Base Rails 7.1 para o sistema de comandas com stack alinhada ao `prompt.md`:
+Base Rails 7.1
 
 - Ruby 3.3.x
 - Rails 7.1.x

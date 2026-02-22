@@ -17,8 +17,18 @@ class User < ApplicationRecord
 
   before_validation :normalize_email
 
+  scope :company_admins, -> { admin.order(:id) }
+
   def oauth_account?
     provider.present? && uid.present?
+  end
+
+  def self.company_account
+    company_admins.first
+  end
+
+  def company_location_query
+    [company_address, company_cep, "Brasil"].filter_map { |value| value.to_s.strip.presence }.join(", ")
   end
 
   private

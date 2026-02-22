@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   resources :products, only: :index
   resources :combos, only: :index
   resources :promotions, only: :index
+  get "mesa/:identifier", to: "table_sessions#show", as: :table_qr
 
   get "login", to: "sessions#new", as: :customer_login
   post "login", to: "sessions#create", as: :customer_session
@@ -18,7 +19,9 @@ Rails.application.routes.draw do
   get "login/google/callback", to: "sessions#google_callback", as: :customer_google_callback
   delete "logout", to: "sessions#destroy", as: :customer_logout
 
-  resource :cart, only: [:show, :update, :destroy]
+  resource :cart, only: [:show, :update, :destroy] do
+    get :delivery_quote
+  end
 
   resources :orders, only: [:index, :create, :show] do
     member do
@@ -34,6 +37,7 @@ Rails.application.routes.draw do
     delete "logout", to: "sessions#destroy"
 
     resource :queue, only: :show, controller: "queue"
+    resource :company_profile, only: [:edit, :update], controller: "company_profiles"
 
     resources :orders, only: [] do
       member do

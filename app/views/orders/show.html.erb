@@ -12,24 +12,31 @@
 
   <section class="row g-3 mt-2">
     <div class="col-12 col-md-4">
-      <article class="metric-card fade-in-up" style="animation-delay:.05s">
+      <article class="metric-card fade-in-up fade-delay-1">
         <small>Posição na fila</small>
         <strong><%= ui_icon(:list) %> <%= @order.queue_position || '-' %></strong>
       </article>
     </div>
     <div class="col-12 col-md-4">
-      <article class="metric-card fade-in-up" style="animation-delay:.1s">
+      <article class="metric-card fade-in-up fade-delay-2">
         <small>Tempo estimado de preparo</small>
         <strong><%= ui_icon(:clock) %> <%= @order.eta_minutes || '-' %> min</strong>
       </article>
     </div>
     <div class="col-12 col-md-4">
-      <article class="metric-card fade-in-up" style="animation-delay:.15s">
+      <article class="metric-card fade-in-up fade-delay-3">
         <small>Total</small>
         <strong><%= ui_icon(:receipt) %> <%= money(@order.total_cents) %></strong>
       </article>
     </div>
   </section>
+
+  <% if @order.order_type_delivery? %>
+    <section class="hero-card mt-3 fade-in-up">
+      <p class="mb-1"><strong>Taxa de entrega:</strong> <%= money(@order.delivery_fee_cents) %></p>
+      <p class="mb-0"><strong>Distância:</strong> <%= @order.delivery_distance_km ? "#{@order.delivery_distance_km} km" : "-" %></p>
+    </section>
+  <% end %>
 
   <section class="hero-card mt-3 fade-in-up">
     <% status_copy = case @order.status

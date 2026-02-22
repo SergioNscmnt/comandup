@@ -1,0 +1,155 @@
+<% if @items.empty? %>
+  <section class="hero-card mt-3 fade-in-up">
+    <h2 class="h5 mb-2"><%= ui_icon(:x) %> Carrinho vazio</h2>
+    <p class="text-secondary mb-3">Adicione produtos para criar seu pedido.</p>
+    <%= link_to products_path, class: "btn btn-brand icon-btn" do %>
+      <%= ui_icon(:box) %>
+      <span>Ver produtos</span>
+    <% end %>
+  </section>
+<% else %>
+  <section class="queue-list mt-3">
+    <% @items.each do |item| %>
+      <article class="queue-card fade-in-up">
+        <div class="d-flex flex-column gap-3 w-100">
+          <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+            <div class="queue-left">
+              <span class="queue-rank"><%= item[:quantity] %>x</span>
+              <div>
+                <h2 class="h6 mb-1"><%= ui_icon(:box) %> <%= item[:product].name %></h2>
+                <p class="text-secondary mb-0"><%= money(item[:unit_cents]) %> cada</p>
+              </div>
+            </div>
+
+            <div class="queue-right">
+              <span class="price-chip"><%= money(item[:total_cents]) %></span>
+              <div class="d-flex gap-1">
+                <%= button_to cart_path(format: :turbo_stream, product_id: item[:product].id, operation: "decrease"), method: :patch, class: "btn btn-sm btn-outline-brand cart-qty-btn icon-btn" do %>
+                  <%= ui_icon(:dash) %>
+                <% end %>
+                <%= button_to cart_path(format: :turbo_stream, product_id: item[:product].id, operation: "add"), method: :patch, class: "btn btn-sm btn-outline-brand cart-qty-btn icon-btn" do %>
+                  <%= ui_icon(:plus) %>
+                <% end %>
+                <%= button_to cart_path(format: :turbo_stream, product_id: item[:product].id, operation: "remove"), method: :patch, class: "btn btn-sm btn-outline-danger icon-btn" do %>
+                  <%= ui_icon(:trash) %>
+                  <span>Remover</span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <% note_field_id = "note-field-#{item[:product].id}" %>
+          <div class="w-100" data-controller="note-toggle">
+            <button type="button" class="btn btn-sm btn-outline-brand icon-btn" data-action="note-toggle#toggle">
+              <span data-note-toggle-target="plusIcon"><%= ui_icon(:plus) %></span>
+              <span data-note-toggle-target="dashIcon" hidden><%= ui_icon(:dash) %></span>
+              <span data-note-toggle-target="label">Observação</span>
+            </button>
+            <div class="mt-2" data-note-toggle-target="panel" hidden>
+              <%= form_with url: cart_path(format: :turbo_stream), method: :patch, class: "w-100", data: { turbo_stream: true } do |f| %>
+                <%= hidden_field_tag :product_id, item[:product].id %>
+                <%= hidden_field_tag :operation, "note" %>
+                <label class="form-label mb-1" for="<%= note_field_id %>">Observação do item</label>
+                <%= text_area_tag :note, item[:note], id: note_field_id, class: "form-control", rows: 3, maxlength: 255, placeholder: "Ex: sem cebola, ponto da carne, sem gelo..." %>
+                <div class="d-grid mt-2">
+                  <%= f.submit "Salvar observação", class: "btn btn-sm btn-outline-brand justify-content-center" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </article>
+    <% end %>
+  </section>
+
+  <section class="hero-card mt-3 fade-in-up">
+    <%= form_with url: orders_path, method: :post, local: true, data: { controller: "delivery-fields" } do |f| %>
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+          <p class="mb-1 text-secondary"><%= ui_icon(:receipt) %> Subtotal</p>
+          <h2 class="h4 mb-0"><%= money(@subtotal_cents) %></h2>
+        </div>
+      </div>
+
+      <% default_order_type = table_session_active? ? "table" : (current_customer ? "pickup" : "table") %>
+
+      <hr>
+      <% if table_session_active? %>
+        <div class="mb-3">
+          <p class="mb-1"><strong>Pedido vinculado via QR Code</strong></p>
+          <p class="text-secondary mb-0">Mesa: <strong><%= current_table_number %></strong></p>
+        </div>
+      <% else %>
+        <p class="mb-2"><strong>Como você quer receber?</strong></p>
+        <div class="d-flex flex-wrap gap-3 mb-3">
+          <% unless current_customer %>
+            <label class="d-flex align-items-center gap-2">
+              <%= radio_button_tag :order_type, "table", default_order_type == "table", data: { action: "change->delivery-fields#toggle" } %>
+              <span>Mesa</span>
+            </label>
+          <% end %>
+          <label class="d-flex align-items-center gap-2">
+            <%= radio_button_tag :order_type, "pickup", default_order_type == "pickup", data: { action: "change->delivery-fields#toggle" } %>
+            <span>Retirada</span>
+          </label>
+          <label class="d-flex align-items-center gap-2">
+            <%= radio_button_tag :order_type, "delivery", false, data: { action: "change->delivery-fields#toggle", delivery_fields_target: "deliveryRadio" } %>
+            <span>Delivery</span>
+          </label>
+        </div>
+
+        <% unless current_customer %>
+          <div class="mb-3">
+            <label class="form-label mb-1">Mesa (obrigatório para pedido de mesa)</label>
+            <%= text_field_tag :table_number, "", class: "form-control", placeholder: "Ex: Mesa 7" %>
+          </div>
+        <% end %>
+      <% end %>
+
+      <div class="mb-3" data-controller="viacep" data-delivery-fields-target="addressSection" data-viacep-subtotal-cents-value="<%= @subtotal_cents %>" hidden>
+        <label class="form-label mb-1">Endereço de entrega (somente delivery)</label>
+        <div class="row g-2 mb-2 align-items-end">
+          <div class="col-12 col-md-3">
+            <%= text_field_tag :delivery_cep, "", class: "form-control", placeholder: "CEP (00000-000)", maxlength: 9, inputmode: "numeric", data: { viacep_target: "cep", action: "input->viacep#maskCep blur->viacep#search", delivery_fields_target: "field", required_when_delivery: true } %>
+          </div>
+          <div class="col-12 col-md-auto">
+            <button type="button" class="btn btn-outline-brand text-nowrap w-100" data-action="viacep#search">Buscar CEP</button>
+          </div>
+        </div>
+        <small class="text-secondary d-block mb-2" data-viacep-target="status"></small>
+        <div class="mb-2">
+          <small class="text-secondary d-block">Taxa de entrega: <strong data-viacep-target="fee"><%= money(0) %></strong></small>
+          <small class="text-secondary d-block">Total estimado: <strong data-viacep-target="total"><%= money(@subtotal_cents) %></strong></small>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label mb-1">Rua</label>
+          <%= text_field_tag :delivery_street, "", class: "form-control", placeholder: "Ex: Rua das Flores", data: { viacep_target: "street", action: "input->viacep#compose", delivery_fields_target: "field", required_when_delivery: true } %>
+        </div>
+
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <label class="form-label mb-1">Número</label>
+            <%= text_field_tag :delivery_number, "", class: "form-control", placeholder: "Ex: 123", data: { viacep_target: "number", action: "input->viacep#compose", delivery_fields_target: "field", required_when_delivery: true } %>
+          </div>
+          <div class="col-6">
+            <label class="form-label mb-1">Bairro</label>
+            <%= text_field_tag :delivery_neighborhood, "", class: "form-control", placeholder: "Ex: Centro", data: { viacep_target: "neighborhood", action: "input->viacep#compose", delivery_fields_target: "field", required_when_delivery: true } %>
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label mb-1">Complemento</label>
+          <%= text_field_tag :delivery_complement, "", class: "form-control", placeholder: "Ex: Apto 21, Bloco B", data: { viacep_target: "complement", action: "input->viacep#compose", delivery_fields_target: "field" } %>
+        </div>
+
+        <%= hidden_field_tag :delivery_address, "", data: { viacep_target: "address", delivery_fields_target: "field" } %>
+      </div>
+
+      <%= f.button class: "btn btn-brand icon-btn" do %>
+        <%= ui_icon(:check) %>
+        <span>Finalizar pedido</span>
+      <% end %>
+    <% end %>
+  </section>
+<% end %>

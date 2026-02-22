@@ -1,13 +1,15 @@
 seed_password = "password123"
 
 admins = [
-  { name: "Admin Operacao", email: "admin@comandup.local" },
+  { name: "Admin Operacao", email: "admin@comandup.local", company_address: "R. Rafael Vaz e Silva, 1961 - São Cristóvão, Porto Velho - RO", company_cep: "76804-320" },
   { name: "Admin Cozinha", email: "admin2@comandup.local" }
 ].map do |attrs|
   user = User.find_or_initialize_by(email: attrs[:email])
   user.assign_attributes(
     name: attrs[:name],
     role: :admin,
+    company_address: attrs[:company_address],
+    company_cep: attrs[:company_cep],
     provider: nil,
     uid: nil,
     password: seed_password,
@@ -39,21 +41,35 @@ customers = [
 end
 
 products = [
-  { name: "X-Burger", description: "Pão brioche, carne 150g e queijo", price_cents: 2490, prep_minutes: 12 },
-  { name: "X-Salada", description: "Hambúrguer, alface, tomate e maionese da casa", price_cents: 2690, prep_minutes: 13 },
-  { name: "X-Bacon", description: "Hambúrguer, bacon crocante e queijo", price_cents: 2990, prep_minutes: 14 },
-  { name: "Batata Frita P", description: "Porção individual", price_cents: 1290, prep_minutes: 8 },
-  { name: "Batata Frita G", description: "Porção para compartilhar", price_cents: 1890, prep_minutes: 10 },
-  { name: "Onion Rings", description: "Anéis de cebola empanados", price_cents: 1690, prep_minutes: 9 },
-  { name: "Refrigerante Lata", description: "350ml", price_cents: 700, prep_minutes: 2 },
-  { name: "Suco Natural", description: "Copo 400ml", price_cents: 1200, prep_minutes: 4 },
-  { name: "Água Mineral", description: "500ml", price_cents: 450, prep_minutes: 1 },
-  { name: "Milkshake Chocolate", description: "400ml", price_cents: 1590, prep_minutes: 6 }
+  { name: "X-Burger", category: "Lanches", description: "Pão brioche, carne 150g e queijo", price_cents: 2490, prep_minutes: 12 },
+  { name: "X-Salada", category: "Lanches", description: "Hambúrguer, alface, tomate e maionese da casa", price_cents: 2690, prep_minutes: 13 },
+  { name: "X-Bacon", category: "Lanches", description: "Hambúrguer, bacon crocante e queijo", price_cents: 2990, prep_minutes: 14 },
+  { name: "Batata Frita P", category: "Porcoes", description: "Porção individual", price_cents: 1290, prep_minutes: 8 },
+  { name: "Batata Frita G", category: "Porcoes", description: "Porção para compartilhar", price_cents: 1890, prep_minutes: 10 },
+  { name: "Onion Rings", category: "Porcoes", description: "Anéis de cebola empanados", price_cents: 1690, prep_minutes: 9 },
+  { name: "Refrigerante Lata", category: "Bebidas", description: "350ml", price_cents: 700, prep_minutes: 2 },
+  { name: "Suco Natural", category: "Bebidas", description: "Copo 400ml", price_cents: 1200, prep_minutes: 4 },
+  { name: "Água Mineral", category: "Bebidas", description: "500ml", price_cents: 450, prep_minutes: 1 },
+  { name: "Milkshake Chocolate", category: "Sobremesas", description: "400ml", price_cents: 1590, prep_minutes: 6 }
 ]
 
+categories = [
+  { name: "Lanches", position: 1 },
+  { name: "Porcoes", position: 2 },
+  { name: "Bebidas", position: 3 },
+  { name: "Sobremesas", position: 4 },
+  { name: "Outros", position: 5 }
+].each_with_object({}) do |attrs, memo|
+  category = Category.find_or_initialize_by(name: attrs[:name])
+  category.assign_attributes(attrs)
+  category.save!
+  memo[category.name] = category
+end
+
 products.each do |attrs|
+  category_name = attrs.delete(:category)
   product = Product.find_or_initialize_by(name: attrs[:name])
-  product.assign_attributes(attrs.merge(active: true))
+  product.assign_attributes(attrs.merge(active: true, category: categories.fetch(category_name)))
   product.save!
 end
 

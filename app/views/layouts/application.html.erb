@@ -26,12 +26,7 @@
             <span>Produtos</span>
           <% end %>
 
-          <%= link_to cart_path, class: "cart-link icon-link" do %>
-            <%= ui_icon(:cart) %>
-            <span><%= t("nav.cart") %></span>
-            <span class="cart-badge"><%= cart_count %></span>
-            <span class="cart-total"><%= money(cart_total_cents) %></span>
-          <% end %>
+          <%= render "shared/nav_cart" %>
 
           <% if current_customer %>
             <%= link_to orders_path, class: "icon-link" do %>
@@ -48,6 +43,10 @@
             <%= link_to admin_queue_path, class: "icon-link" do %>
               <%= ui_icon(:list) %>
               <span>Fila Admin</span>
+            <% end %>
+            <%= link_to edit_admin_company_profile_path, class: "icon-link" do %>
+              <%= ui_icon(:receipt) %>
+              <span>Empresa</span>
             <% end %>
             <%= button_to admin_logout_path, method: :delete, class: "btn btn-sm btn-outline-brand nav-logout" do %>
               <%= ui_icon(:logout) %>
@@ -90,5 +89,7 @@
       <% end %>
       <%= yield %>
     </main>
+
+    <%= render "shared/toast_area" %>
   </body>
 </html>

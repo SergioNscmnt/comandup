@@ -1,0 +1,8 @@
+<div id="cart-header-actions">
+  <% if @items.any? %>
+    <%= button_to cart_path, method: :delete, class: "btn btn-outline-brand icon-btn" do %>
+      <%= ui_icon(:trash) %>
+      <span>Limpar carrinho</span>
+    <% end %>
+  <% end %>
+</div>

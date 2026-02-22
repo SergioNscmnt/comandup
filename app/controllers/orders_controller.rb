@@ -17,8 +17,9 @@ class OrdersController < ApplicationController
       customer: current_customer,
       items: items,
       order_type: order_type,
-      table_number: params[:table_number],
-      delivery_address: params[:delivery_address]
+      table_number: effective_table_number,
+      delivery_address: params[:delivery_address],
+      delivery_cep: params[:delivery_cep]
     ).call
     authorize order, :create?
 
@@ -63,7 +64,7 @@ class OrdersController < ApplicationController
   private
 
   def order_params
-    params.permit(:order_type, :table_number, :delivery_address, items: [:product_id, :combo_id, :quantity, :notes])
+    params.permit(:order_type, :table_number, :delivery_address, :delivery_cep, items: [:product_id, :combo_id, :quantity, :notes])
   end
 
   def cart_items_payload
@@ -77,11 +78,19 @@ class OrdersController < ApplicationController
   end
 
   def normalized_order_type
+    return :table if table_session_active?
+
     value = order_params[:order_type].presence || "table"
     value = value.to_s.downcase
     return :table unless Order.order_types.key?(value)
 
     value.to_sym
+  end
+
+  def effective_table_number
+    return current_table_number if table_session_active?
+
+    params[:table_number]
   end
 
   def ensure_checkout_access!(order_type)

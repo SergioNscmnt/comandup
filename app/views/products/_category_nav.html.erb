@@ -1,0 +1,11 @@
+<div id="products-category-nav" class="category-nav mt-3">
+  <%= link_to products_path, class: "category-chip #{'is-active' if @selected_category_id.blank?}" do %>
+    Todas
+  <% end %>
+
+  <% @categories.each do |category| %>
+    <%= link_to products_path(category_id: category.id), class: "category-chip #{'is-active' if @selected_category_id == category.id}" do %>
+      <%= category.name %>
+    <% end %>
+  <% end %>
+</div>

@@ -20,7 +20,8 @@ class Order < ApplicationRecord
   scope :open_queue, -> { where(status: [statuses[:received], statuses[:in_production]]).order(created_at: :asc) }
   scope :for_customer_channel, -> { where(order_type: [order_types[:pickup], order_types[:delivery]]) }
 
-  validates :subtotal_cents, :discount_cents, :total_cents, numericality: { greater_than_or_equal_to: 0 }
+  validates :subtotal_cents, :discount_cents, :total_cents, :delivery_fee_cents, numericality: { greater_than_or_equal_to: 0 }
+  validates :delivery_distance_km, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates :table_number, presence: true, if: :order_type_table?
   validates :customer_id, presence: true, if: -> { order_type_pickup? || order_type_delivery? }
   validates :delivery_address, presence: true, if: :order_type_delivery?

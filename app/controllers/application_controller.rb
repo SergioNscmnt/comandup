@@ -2,7 +2,7 @@ class ApplicationController < ActionController::Base
   include Pundit::Authorization
 
   rescue_from Pundit::NotAuthorizedError, with: :forbidden
-  helper_method :current_admin, :current_customer, :current_user, :cart_count, :cart_total_cents
+  helper_method :current_admin, :current_customer, :current_user, :cart_count, :cart_total_cents, :cart_quantity_for, :cart_note_for, :current_table_number, :table_session_active?
 
   private
 
@@ -75,8 +75,24 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def cart_quantity_for(product_id)
+    cart_entry(product_id)["quantity"].to_i
+  end
+
+  def cart_note_for(product_id)
+    cart_entry(product_id)["note"].to_s
+  end
+
   def clear_cart!
     session[:cart] = {}
+  end
+
+  def current_table_number
+    session[:table_number].to_s.strip.presence
+  end
+
+  def table_session_active?
+    current_table_number.present?
   end
 
   def require_admin!

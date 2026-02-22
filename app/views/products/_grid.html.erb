@@ -1,0 +1,63 @@
+<div id="products-grid" class="row g-3 mt-2">
+  <% @products.each_with_index do |product, index| %>
+    <% current_qty = cart_quantity_for(product.id) %>
+    <div class="col-12 col-md-6 col-xl-4">
+      <article class="product-card fade-in-up fade-delay-<%= index % 6 %>">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h2 class="h5 mb-0"><%= ui_icon(:box) %> <%= product.name %></h2>
+          <span class="price-chip"><%= money(product.price_cents) %></span>
+        </div>
+
+        <p class="text-secondary mb-3"><%= product.description.presence || "Item do catálogo" %></p>
+
+        <div class="d-flex justify-content-end align-items-center mb-3">
+          <span class="status-dot <%= product.active? ? 'is-on' : 'is-off' %>">
+            <%= product.active? ? ui_icon(:check) : ui_icon(:x) %>
+            <%= product.active? ? 'ativo' : 'inativo' %>
+          </span>
+        </div>
+
+        <div class="product-quantity-control">
+          <%= form_with url: cart_path(format: :turbo_stream), method: :patch, data: { turbo: true, turbo_stream: true }, class: "product-quantity-control__form" do %>
+            <%= hidden_field_tag :product_id, product.id %>
+            <%= hidden_field_tag :category_id, @selected_category_id %>
+
+            <button type="submit" name="operation" value="decrease" class="btn btn-sm btn-outline-brand icon-btn" aria-label="<%= "Diminuir quantidade de #{product.name}" %>">
+              <%= ui_icon(:dash) %>
+            </button>
+
+            <span class="product-quantity-value"><%= current_qty %></span>
+
+            <button type="submit" name="operation" value="add" class="btn btn-sm btn-outline-brand icon-btn" aria-label="<%= "Aumentar quantidade de #{product.name}" %>">
+              <%= ui_icon(:plus) %>
+            </button>
+          <% end %>
+        </div>
+
+        <% if current_qty.positive? %>
+          <% note_field_id = "product-note-#{product.id}" %>
+          <div class="mt-2" data-controller="note-toggle">
+            <button type="button" class="btn btn-sm btn-outline-brand icon-btn" data-action="note-toggle#toggle">
+              <span data-note-toggle-target="plusIcon"><%= ui_icon(:plus) %></span>
+              <span data-note-toggle-target="dashIcon" hidden><%= ui_icon(:dash) %></span>
+              <span data-note-toggle-target="label">Observação</span>
+            </button>
+
+            <div class="mt-2" data-note-toggle-target="panel" hidden>
+              <%= form_with url: cart_path(format: :turbo_stream), method: :patch, data: { turbo: true, turbo_stream: true } do |f| %>
+                <%= hidden_field_tag :product_id, product.id %>
+                <%= hidden_field_tag :category_id, @selected_category_id %>
+                <%= hidden_field_tag :operation, "note" %>
+                <label class="form-label mb-1" for="<%= note_field_id %>">Observação do item</label>
+                <%= text_area_tag :note, cart_note_for(product.id), id: note_field_id, class: "form-control", rows: 2, maxlength: 255, placeholder: "Ex: sem cebola, bem passado..." %>
+                <div class="d-grid mt-2">
+                  <%= f.submit "Salvar observação", class: "btn btn-sm btn-outline-brand justify-content-center" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </article>
+    </div>
+  <% end %>
+</div>

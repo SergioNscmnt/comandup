@@ -1,0 +1,9 @@
+<% message = local_assigns[:message] %>
+<div id="toast-area" class="toast-area" aria-live="polite" aria-atomic="true">
+  <% if message.present? %>
+    <div class="toast-notice" data-controller="toast" data-toast-timeout-value="2200" role="status">
+      <%= ui_icon(:check) %>
+      <span><%= message %></span>
+    </div>
+  <% end %>
+</div>

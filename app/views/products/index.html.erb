@@ -6,54 +6,10 @@
       <p class="text-secondary mb-0">Escolha rápida com visual claro de preço.</p>
     </div>
 
-    <div class="cart-summary-chip">
-      <small><%= ui_icon(:cart) %> Total no carrinho</small>
-      <strong><%= money(cart_total_cents) %></strong>
-    </div>
+    <%= render "cart_summary_chip" %>
   </div>
 
-  <div class="row g-3 mt-2">
-    <% @products.each_with_index do |product, index| %>
-      <div class="col-12 col-md-6 col-xl-4">
-        <article class="product-card fade-in-up" style="animation-delay:<%= (index % 6) * 0.05 %>s">
-          <div class="d-flex justify-content-between align-items-start mb-2">
-            <h2 class="h5 mb-0"><%= ui_icon(:box) %> <%= product.name %></h2>
-            <span class="price-chip"><%= money(product.price_cents) %></span>
-          </div>
+  <%= render "category_nav" %>
 
-          <p class="text-secondary mb-3"><%= product.description.presence || "Item do catálogo" %></p>
-
-          <div class="d-flex justify-content-end align-items-center">
-            <span class="status-dot <%= product.active? ? 'is-on' : 'is-off' %>">
-              <%= product.active? ? ui_icon(:check) : ui_icon(:x) %>
-              <%= product.active? ? 'ativo' : 'inativo' %>
-            </span>
-          </div>
-
-          <div class="mt-3">
-            <%= form_with url: cart_path, method: :patch, local: true do %>
-              <%= hidden_field_tag :product_id, product.id %>
-              <%= hidden_field_tag :operation, "add" %>
-
-              <details class="mb-2">
-                <summary class="btn btn-sm btn-outline-brand icon-btn">
-                  <%= ui_icon(:receipt) %>
-                  <span>Adicionar observação</span>
-                </summary>
-                <div class="mt-2">
-                  <label class="form-label mb-1">Observação (opcional)</label>
-                  <%= text_area_tag :note, "", class: "form-control", rows: 3, maxlength: 255, placeholder: "Ex: sem cebola, bem passado..." %>
-                </div>
-              </details>
-
-              <%= button_tag type: :submit, class: "btn btn-brand w-100 icon-btn" do %>
-                <%= ui_icon(:cart_plus) %>
-                <span>Adicionar ao carrinho</span>
-              <% end %>
-            <% end %>
-          </div>
-        </article>
-      </div>
-    <% end %>
-  </div>
+  <%= render "grid" %>
 </div>

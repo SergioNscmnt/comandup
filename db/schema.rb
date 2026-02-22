@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_21_105500) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_22_131000) do
   create_table "audit_logs", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.bigint "order_id", null: false
     t.bigint "user_id"
@@ -26,6 +26,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_21_105500) do
     t.index ["user_id", "created_at"], name: "index_audit_logs_on_user_id_and_created_at"
     t.index ["user_id"], name: "index_audit_logs_on_user_id"
     t.check_constraint "json_valid(`metadata`)", name: "metadata"
+  end
+
+  create_table "categories", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_categories_on_name", unique: true
+    t.index ["position"], name: "index_categories_on_position"
   end
 
   create_table "combo_items", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
@@ -88,6 +97,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_21_105500) do
     t.datetime "ready_at"
     t.datetime "delivered_at"
     t.datetime "canceled_at"
+    t.integer "delivery_fee_cents", default: 0, null: false
+    t.decimal "delivery_distance_km", precision: 8, scale: 2
     t.index ["customer_id", "created_at"], name: "index_orders_on_customer_id_and_created_at"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
     t.index ["order_type", "status", "created_at"], name: "idx_orders_type_status_created"
@@ -95,6 +106,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_21_105500) do
     t.index ["service_token"], name: "index_orders_on_service_token", unique: true
     t.index ["status", "created_at"], name: "index_orders_on_status_and_created_at"
     t.index ["table_number"], name: "index_orders_on_table_number"
+    t.check_constraint "`delivery_distance_km` is null or `delivery_distance_km` >= 0", name: "chk_orders_delivery_distance_km"
+    t.check_constraint "`delivery_fee_cents` >= 0", name: "chk_orders_delivery_fee_cents"
     t.check_constraint "`discount_cents` >= 0", name: "chk_orders_discount_cents"
     t.check_constraint "`status` in (0,1,2,3,4,5,6)", name: "chk_orders_status"
     t.check_constraint "`subtotal_cents` >= 0", name: "chk_orders_subtotal_cents"
@@ -128,7 +141,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_21_105500) do
     t.integer "prep_minutes", default: 10, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "category_id", null: false
     t.index ["active"], name: "index_products_on_active"
+    t.index ["category_id"], name: "index_products_on_category_id"
     t.check_constraint "`prep_minutes` > 0", name: "chk_products_prep_minutes"
     t.check_constraint "`price_cents` >= 0", name: "chk_products_price_cents"
   end
@@ -155,6 +170,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_21_105500) do
     t.string "provider"
     t.string "uid"
     t.string "avatar_url"
+    t.string "company_address"
+    t.string "company_cep"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
     t.check_constraint "`role` in (0,1)", name: "chk_users_role"
@@ -169,4 +186,5 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_21_105500) do
   add_foreign_key "order_items", "products"
   add_foreign_key "orders", "users", column: "customer_id"
   add_foreign_key "payments", "orders"
+  add_foreign_key "products", "categories"
 end

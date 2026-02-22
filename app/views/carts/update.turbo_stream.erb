@@ -1,0 +1,29 @@
+<%= turbo_stream.replace "nav_cart" do %>
+  <%= render "shared/nav_cart" %>
+<% end %>
+
+<%= turbo_stream.replace "products-cart-summary" do %>
+  <%= render "products/cart_summary_chip" %>
+<% end %>
+
+<%= turbo_stream.replace "products-category-nav" do %>
+  <%= render "products/category_nav" %>
+<% end %>
+
+<%= turbo_stream.replace "products-grid" do %>
+  <%= render "products/grid" %>
+<% end %>
+
+<%= turbo_stream.replace "cart-content" do %>
+  <div id="cart-content">
+    <%= render "content" %>
+  </div>
+<% end %>
+
+<%= turbo_stream.replace "cart-header-actions" do %>
+  <%= render "header_actions" %>
+<% end %>
+
+<%= turbo_stream.replace "toast-area" do %>
+  <%= render "shared/toast_area", message: @toast_message %>
+<% end %>

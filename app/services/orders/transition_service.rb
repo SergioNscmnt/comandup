@@ -49,7 +49,7 @@ module Orders
           from_status: Order.statuses[from_status],
           to_status: Order.statuses[to.to_s],
           reason: @reason,
-          metadata: bypass ? { queue_bypass: true } : {}
+          metadata: metadata_payload(bypass)
         )
       end
 
@@ -67,6 +67,10 @@ module Orders
         delivered: :delivered_at,
         canceled: :canceled_at
       }[status.to_sym]
+    end
+
+    def metadata_payload(bypass)
+      JSON.generate(bypass ? { queue_bypass: true } : {})
     end
   end
 end

@@ -1,0 +1,8 @@
+<%= turbo_frame_tag "nav_cart" do %>
+  <%= link_to cart_path, class: "cart-link icon-link", data: { turbo_frame: "_top" } do %>
+    <%= ui_icon(:cart) %>
+    <span><%= t("nav.cart") %></span>
+    <span class="cart-badge"><%= cart_count %></span>
+    <span class="cart-total"><%= money(cart_total_cents) %></span>
+  <% end %>
+<% end %>

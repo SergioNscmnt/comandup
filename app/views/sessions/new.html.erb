@@ -1,51 +1,54 @@
 <div class="container py-4 py-lg-5">
-  <section class="hero-card fade-in-up mx-auto" style="max-width:680px;">
+  <section class="hero-card fade-in-up auth-card mx-auto" data-controller="signup-toggle">
     <p class="eyebrow mb-1">Acesso do cliente</p>
-    <h1 class="h3 mb-2"><%= ui_icon(:login) %> Entrar para Retirada ou Delivery</h1>
-    <p class="text-secondary mb-4">Use seu email e senha para criar conta/entrar, ou continue com Google.</p>
+    <h1 class="h3 mb-2"><%= ui_icon(:login) %> Entrar</h1>
+    <p class="text-secondary mb-4">Entre com seu email e senha para acompanhar seus pedidos.</p>
 
-    <div class="row g-3">
-      <div class="col-12 col-lg-6">
-        <h2 class="h6 mb-3">Entrar com email</h2>
-        <%= form_with url: customer_session_path, method: :post, local: true do |f| %>
-          <div class="mb-2">
-            <%= f.email_field :email, value: @login_email, class: "form-control", required: true, autocomplete: "email", placeholder: "seu@email.com" %>
-          </div>
-          <div class="mb-3">
-            <%= f.password_field :password, class: "form-control", required: true, autocomplete: "current-password", placeholder: "Sua senha" %>
-          </div>
-          <div class="d-grid">
-            <button type="submit" class="btn btn-brand icon-btn">
-              <%= ui_icon(:login) %>
-              <span>Entrar</span>
-            </button>
-          </div>
-        <% end %>
+    <%= form_with url: customer_session_path, method: :post, local: true do |f| %>
+      <div class="mb-2">
+        <%= f.email_field :email, value: @login_email, class: "form-control", required: true, autocomplete: "email", placeholder: "seu@email.com" %>
       </div>
+      <div class="mb-3">
+        <%= f.password_field :password, class: "form-control", required: true, autocomplete: "current-password", placeholder: "Sua senha" %>
+      </div>
+      <div class="row g-2">
+        <div class="col-6 d-grid">
+          <button type="submit" class="btn btn-brand icon-btn justify-content-center">
+            <%= ui_icon(:login) %>
+            <span>Entrar</span>
+          </button>
+        </div>
+        <div class="col-6 d-grid">
+          <button type="button" class="btn btn-outline-brand icon-btn justify-content-center" data-signup-toggle-target="button" data-action="signup-toggle#toggle" aria-expanded="false">
+            <span data-signup-toggle-target="plusIcon"><%= ui_icon(:plus) %></span>
+            <span data-signup-toggle-target="dashIcon" hidden><%= ui_icon(:dash) %></span>
+            <span data-signup-toggle-target="label"> Cadastre-se</span>
+          </button>
+        </div>
+      </div>
+    <% end %>
 
-      <div class="col-12 col-lg-6">
-        <h2 class="h6 mb-3">Criar conta</h2>
-        <%= form_with url: customer_signup_path, method: :post, local: true do |f| %>
-          <div class="mb-2">
-            <%= f.text_field :name, value: @signup_name, class: "form-control", required: true, autocomplete: "name", placeholder: "Seu nome" %>
-          </div>
-          <div class="mb-2">
-            <%= f.email_field :email, value: @signup_email, class: "form-control", required: true, autocomplete: "email", placeholder: "seu@email.com" %>
-          </div>
-          <div class="mb-2">
-            <%= f.password_field :password, class: "form-control", required: true, autocomplete: "new-password", minlength: 8, placeholder: "Senha (min. 8 caracteres)" %>
-          </div>
-          <div class="mb-3">
-            <%= f.password_field :password_confirmation, class: "form-control", required: true, autocomplete: "new-password", minlength: 8, placeholder: "Confirmar senha" %>
-          </div>
-          <div class="d-grid">
-            <button type="submit" class="btn btn-outline-brand icon-btn">
-              <%= ui_icon(:check) %>
-              <span>Criar conta</span>
-            </button>
-          </div>
-        <% end %>
-      </div>
+    <div class="mt-3" id="signup-panel" data-signup-toggle-target="panel" hidden>
+      <%= form_with url: customer_signup_path, method: :post, local: true do |f| %>
+        <div class="mb-2">
+          <%= f.text_field :name, value: @signup_name, class: "form-control", required: true, autocomplete: "name", placeholder: "Seu nome" %>
+        </div>
+        <div class="mb-2">
+          <%= f.email_field :email, value: @signup_email, class: "form-control", required: true, autocomplete: "email", placeholder: "seu@email.com" %>
+        </div>
+        <div class="mb-2">
+          <%= f.password_field :password, class: "form-control", required: true, autocomplete: "new-password", minlength: 8, placeholder: "Senha (min. 8 caracteres)" %>
+        </div>
+        <div class="mb-3">
+          <%= f.password_field :password_confirmation, class: "form-control", required: true, autocomplete: "new-password", minlength: 8, placeholder: "Confirmar senha" %>
+        </div>
+        <div class="d-grid">
+          <button type="submit" class="btn btn-outline-brand icon-btn">
+            <%= ui_icon(:check) %>
+            <span>Criar conta</span>
+          </button>
+        </div>
+      <% end %>
     </div>
 
     <hr class="my-4">
@@ -53,7 +56,7 @@
     <div class="d-grid d-sm-flex">
       <%= link_to customer_google_login_path, class: "btn btn-brand icon-btn" do %>
         <%= ui_icon(:login) %>
-        <span>Continuar com Google</span>
+        <span>Entrar com Google</span>
       <% end %>
     </div>
 

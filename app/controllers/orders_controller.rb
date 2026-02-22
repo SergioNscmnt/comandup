@@ -89,7 +89,7 @@ class OrdersController < ApplicationController
     return true if current_customer
 
     session[:return_to] = cart_path
-    redirect_to customer_login_path, alert: "Entrar com Google para continuar."
+    redirect_to customer_login_path, alert: "Entre com sua conta para continuar."
     false
   end
 end

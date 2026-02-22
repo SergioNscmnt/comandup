@@ -12,7 +12,10 @@ Rails.application.routes.draw do
   resources :promotions, only: :index
 
   get "login", to: "sessions#new", as: :customer_login
-  post "login/google", to: "sessions#create_google", as: :customer_google_login
+  post "login", to: "sessions#create", as: :customer_session
+  post "signup", to: "sessions#signup", as: :customer_signup
+  get "login/google", to: "sessions#google_start", as: :customer_google_login
+  get "login/google/callback", to: "sessions#google_callback", as: :customer_google_callback
   delete "logout", to: "sessions#destroy", as: :customer_logout
 
   resource :cart, only: [:show, :update, :destroy]

@@ -18,6 +18,8 @@ services:
       REDIS_URL: redis://redis:6379/0
       REDIS_CACHE_URL: redis://redis:6379/2
       LOG_JSON: "true"
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
     volumes:
       - .:/rails
       - bundle_data:/usr/local/bundle
@@ -49,6 +51,8 @@ services:
       REDIS_URL: redis://redis:6379/0
       REDIS_CACHE_URL: redis://redis:6379/2
       LOG_JSON: "true"
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
     volumes:
       - .:/rails
       - bundle_data:/usr/local/bundle

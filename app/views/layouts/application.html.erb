@@ -14,7 +14,7 @@
     <div class="page-bg"></div>
 
     <header class="app-header">
-      <div class="container app-nav">
+      <div class="container-fluid app-nav">
         <%= link_to root_path, class: "brand" do %>
           <span class="brand-dot"></span>
           <span>ComandUp</span>
@@ -42,11 +42,6 @@
               <%= ui_icon(:logout) %>
               <span>Sair cliente</span>
             <% end %>
-          <% else %>
-            <%= link_to customer_login_path, class: "icon-link" do %>
-              <%= ui_icon(:login) %>
-              <span>Login Cliente</span>
-            <% end %>
           <% end %>
 
           <% if current_admin %>
@@ -58,11 +53,25 @@
               <%= ui_icon(:logout) %>
               <span>Sair</span>
             <% end %>
-          <% else %>
-            <%= link_to admin_login_path, class: "icon-link" do %>
-              <%= ui_icon(:login) %>
-              <span>Admin Login</span>
-            <% end %>
+          <% end %>
+
+          <% unless current_customer || current_admin %>
+            <details class="nav-auth-dropdown">
+              <summary class="btn btn-sm btn-outline-brand icon-btn nav-auth-trigger">
+                <%= ui_icon(:login) %>
+                <span>Entrar</span>
+              </summary>
+              <div class="nav-auth-menu">
+                <%= link_to customer_login_path, class: "icon-link" do %>
+                  <%= ui_icon(:login) %>
+                  <span>Entrar ou criar conta</span>
+                <% end %>
+                <%= link_to admin_login_path, class: "icon-link" do %>
+                  <%= ui_icon(:login) %>
+                  <span>Entrar como Administrador</span>
+                <% end %>
+              </div>
+            </details>
           <% end %>
         </nav>
       </div>

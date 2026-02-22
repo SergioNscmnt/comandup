@@ -12,8 +12,28 @@ class User < ApplicationRecord
   validates :uid, presence: true, if: -> { provider.present? }
   validates :uid, uniqueness: { scope: :provider }, allow_nil: true
   validates :password_digest, presence: true, unless: :oauth_account?
+  validates :password, presence: true, if: :password_required?
+  validates :password, length: { minimum: 8 }, if: :password_present_for_local_account?
+
+  before_validation :normalize_email
 
   def oauth_account?
     provider.present? && uid.present?
+  end
+
+  private
+
+  def normalize_email
+    self.email = email.to_s.downcase.strip
+  end
+
+  def password_required?
+    return false if oauth_account?
+
+    new_record? || password.present?
+  end
+
+  def password_present_for_local_account?
+    !oauth_account? && password.present?
   end
 end

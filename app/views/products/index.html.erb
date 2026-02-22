@@ -3,7 +3,7 @@
     <div>
       <p class="eyebrow mb-1">Cardápio</p>
       <h1 class="h2 mb-2"><%= ui_icon(:box) %> Produtos disponíveis</h1>
-      <p class="text-secondary mb-0">Escolha rápida com visual claro de preço e tempo de preparo.</p>
+      <p class="text-secondary mb-0">Escolha rápida com visual claro de preço.</p>
     </div>
 
     <div class="cart-summary-chip">
@@ -23,8 +23,7 @@
 
           <p class="text-secondary mb-3"><%= product.description.presence || "Item do catálogo" %></p>
 
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="prep-chip"><%= ui_icon(:clock) %> <%= product.prep_minutes %> min preparo</span>
+          <div class="d-flex justify-content-end align-items-center">
             <span class="status-dot <%= product.active? ? 'is-on' : 'is-off' %>">
               <%= product.active? ? ui_icon(:check) : ui_icon(:x) %>
               <%= product.active? ? 'ativo' : 'inativo' %>

@@ -2,22 +2,60 @@
   <section class="hero-card fade-in-up mx-auto" style="max-width:680px;">
     <p class="eyebrow mb-1">Acesso do cliente</p>
     <h1 class="h3 mb-2"><%= ui_icon(:login) %> Entrar para Retirada ou Delivery</h1>
-    <p class="text-secondary mb-4">Use seu e-mail Google para acompanhar pedidos de retirada e delivery em qualquer dispositivo.</p>
+    <p class="text-secondary mb-4">Use seu email e senha para criar conta/entrar, ou continue com Google.</p>
 
-    <%= form_with url: customer_google_login_path, method: :post, local: true do %>
-      <div class="mb-2">
-        <label class="form-label mb-1">Nome</label>
-        <%= text_field_tag :name, "", class: "form-control", placeholder: "Seu nome" %>
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <h2 class="h6 mb-3">Entrar com email</h2>
+        <%= form_with url: customer_session_path, method: :post, local: true do |f| %>
+          <div class="mb-2">
+            <%= f.email_field :email, value: @login_email, class: "form-control", required: true, autocomplete: "email", placeholder: "seu@email.com" %>
+          </div>
+          <div class="mb-3">
+            <%= f.password_field :password, class: "form-control", required: true, autocomplete: "current-password", placeholder: "Sua senha" %>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-brand icon-btn">
+              <%= ui_icon(:login) %>
+              <span>Entrar</span>
+            </button>
+          </div>
+        <% end %>
       </div>
-      <div class="mb-3">
-        <label class="form-label mb-1">E-mail Google</label>
-        <%= email_field_tag :email, "", class: "form-control", placeholder: "voce@gmail.com", required: true %>
+
+      <div class="col-12 col-lg-6">
+        <h2 class="h6 mb-3">Criar conta</h2>
+        <%= form_with url: customer_signup_path, method: :post, local: true do |f| %>
+          <div class="mb-2">
+            <%= f.text_field :name, value: @signup_name, class: "form-control", required: true, autocomplete: "name", placeholder: "Seu nome" %>
+          </div>
+          <div class="mb-2">
+            <%= f.email_field :email, value: @signup_email, class: "form-control", required: true, autocomplete: "email", placeholder: "seu@email.com" %>
+          </div>
+          <div class="mb-2">
+            <%= f.password_field :password, class: "form-control", required: true, autocomplete: "new-password", minlength: 8, placeholder: "Senha (min. 8 caracteres)" %>
+          </div>
+          <div class="mb-3">
+            <%= f.password_field :password_confirmation, class: "form-control", required: true, autocomplete: "new-password", minlength: 8, placeholder: "Confirmar senha" %>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-outline-brand icon-btn">
+              <%= ui_icon(:check) %>
+              <span>Criar conta</span>
+            </button>
+          </div>
+        <% end %>
       </div>
-      <%= button_tag type: :submit, class: "btn btn-brand icon-btn" do %>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="d-grid d-sm-flex">
+      <%= link_to customer_google_login_path, class: "btn btn-brand icon-btn" do %>
         <%= ui_icon(:login) %>
-        <span>Entrar com Google (modo dev)</span>
+        <span>Continuar com Google</span>
       <% end %>
-    <% end %>
+    </div>
 
     <p class="text-secondary mt-3 mb-0">Pedidos de mesa continuam sem login.</p>
   </section>

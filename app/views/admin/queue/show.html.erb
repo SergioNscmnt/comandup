@@ -1,4 +1,4 @@
-<div class="container py-4 py-lg-5">
+<div class="container-fluid queue-admin-container py-4 py-lg-5">
   <section class="section-head fade-in-up d-flex flex-wrap justify-content-between gap-3 align-items-end">
     <div>
       <p class="eyebrow mb-1">Operação</p>
@@ -17,87 +17,85 @@
     </div>
   </section>
 
-  <section class="queue-list mt-3">
+  <section class="queue-list queue-list--admin mt-3">
     <% @orders.each_with_index do |order, index| %>
-      <article class="queue-card queue-card--admin fade-in-up" style="animation-delay:<%= (index % 8) * 0.04 %>s">
-        <div class="queue-card-top">
-          <div class="queue-left">
+      <% item_notes = order.order_items.filter_map { |item| item.notes.to_s.strip.presence } %>
+      <% total_items = order.order_items.sum(&:quantity) %>
+      <% action = if order.received?
+                    { label: "Iniciar", path: start_production_admin_order_path(order), icon: :clock }
+                  elsif order.in_production?
+                    { label: "Pronto", path: finish_admin_order_path(order), icon: :check }
+                  elsif order.ready?
+                    { label: "Finalizar", path: mark_delivered_admin_order_path(order), icon: :check }
+                  end %>
+      <article class="queue-card queue-order-card queue-order-card--<%= order.status %> fade-in-up" style="animation-delay:<%= (index % 8) * 0.04 %>s">
+        <div class="queue-order-card__header">
+          <div class="queue-order-card__title">
             <span class="queue-rank">#<%= order.queue_position || index + 1 %></span>
-            <h2 class="h6 mb-0"><%= ui_icon(:receipt) %> Pedido #<%= order.id %></h2>
+            <div>
+              <h2 class="h6 mb-0"><%= ui_icon(:receipt) %> Pedido #<%= order.id %></h2>
+              <small class="text-secondary"><%= l(order.created_at, format: :short) %></small>
+            </div>
           </div>
-
-          <div class="queue-meta">
+          <div class="queue-order-card__meta">
             <span class="status-pill status-<%= order.status %>"><%= ui_icon(:check) %> <%= order.human_status %></span>
-            <span class="prep-chip prep-chip--eta"><%= ui_icon(:clock) %> Tempo estimado de preparo: <%= order.eta_minutes || '-' %> min</span>
+            <span class="prep-chip prep-chip--eta"><%= ui_icon(:clock) %> ETA: <%= order.eta_minutes || '-' %> min</span>
           </div>
         </div>
 
-        <div class="queue-card-body">
-          <section class="queue-section">
-            <p class="section-title mb-1">Dados do pedido</p>
-            <p class="text-secondary mb-1"><strong>Criado em:</strong> <%= l(order.created_at, format: :short) %></p>
-            <p class="text-secondary mb-1">
-              <strong>Tipo:</strong> <%= order.human_order_type %>
-              <% if order.order_type_table? %>
-                | <strong>Mesa:</strong> <%= order.table_number %>
-              <% end %>
-            </p>
-            <% if order.customer.present? %>
-              <p class="text-secondary mb-1"><strong>Cliente:</strong> <%= order.customer.name %> (<%= order.customer.email %>)</p>
+        <div class="queue-order-card__facts">
+          <span class="queue-fact"><strong>Tipo:</strong> <%= order.human_order_type %>
+            <% if order.order_type_table? %>
+              (Mesa <%= order.table_number %>)
             <% end %>
-            <% if order.order_type_delivery? && order.delivery_address.present? %>
-              <p class="text-secondary mb-1"><strong>Endereço:</strong> <%= order.delivery_address %></p>
-            <% end %>
-            <p class="text-secondary mb-0"><strong>Total:</strong> <span class="fact-value--total"><%= money(order.total_cents) %></span></p>
-          </section>
+          </span>
+          <span class="queue-fact"><strong>Itens:</strong> <%= total_items %></span>
+          <span class="queue-fact"><strong>Total:</strong> <span class="fact-value--total"><%= money(order.total_cents) %></span></span>
+          <% if order.customer.present? %>
+            <span class="queue-fact"><strong>Cliente:</strong> <%= order.customer.name %></span>
+          <% end %>
+        </div>
 
-          <section class="queue-section">
-            <p class="section-title mb-1">Itens do pedido</p>
-            <ul class="order-items-list">
-              <% order.order_items.each do |item| %>
-                <li>
-                  <span class="item-main"><strong><%= item.quantity %>x</strong> <%= item.product&.name || item.combo&.name %></span>
-                  <span class="item-price"><%= money(item.total_cents) %></span>
-                </li>
+        <section class="queue-order-card__items">
+          <p class="section-title mb-1">Itens</p>
+          <ul class="order-items-list">
+            <% order.order_items.each do |item| %>
+              <li>
+                <span class="item-main"><strong><%= item.quantity %>x</strong> <%= item.product&.name || item.combo&.name %></span>
+                <span class="item-price"><%= money(item.total_cents) %></span>
+              </li>
+            <% end %>
+          </ul>
+        </section>
+
+        <details class="queue-details">
+          <summary>Detalhes</summary>
+          <% if order.customer.present? %>
+            <p class="text-secondary mb-1"><strong>Contato:</strong> <%= order.customer.email %></p>
+          <% end %>
+          <% if order.order_type_delivery? && order.delivery_address.present? %>
+            <p class="text-secondary mb-1"><strong>Endereço:</strong> <%= order.delivery_address %></p>
+          <% end %>
+          <% if item_notes.any? %>
+            <p class="text-secondary mb-1"><strong>Observações:</strong></p>
+            <ul class="notes-list">
+              <% item_notes.each do |note| %>
+                <li><%= note %></li>
               <% end %>
             </ul>
-          </section>
+          <% elsif !order.customer.present? && !(order.order_type_delivery? && order.delivery_address.present?) %>
+            <p class="text-secondary mb-0">Sem detalhes adicionais.</p>
+          <% end %>
+        </details>
 
-          <section class="queue-section">
-            <p class="section-title mb-1">Observações</p>
-            <% item_notes = order.order_items.filter_map { |item| item.notes.to_s.strip.presence } %>
-            <% if item_notes.any? %>
-              <ul class="notes-list">
-                <% item_notes.each do |note| %>
-                  <li><%= note %></li>
-                <% end %>
-              </ul>
-            <% else %>
-              <p class="text-secondary mb-0">Não há observações para este pedido</p>
-            <% end %>
-          </section>
-        </div>
-
-        <div class="queue-card-footer">
-          <div class="d-flex gap-1 justify-content-end">
-            <% if order.received? %>
-              <%= button_to start_production_admin_order_path(order), method: :post, class: "btn btn-sm btn-outline-brand icon-btn" do %>
-                <%= ui_icon(:clock) %>
-                <span>Iniciar</span>
-              <% end %>
-            <% elsif order.in_production? %>
-              <%= button_to finish_admin_order_path(order), method: :post, class: "btn btn-sm btn-outline-brand icon-btn" do %>
-                <%= ui_icon(:check) %>
-                <span>Pronto</span>
-              <% end %>
-            <% elsif order.ready? %>
-              <%= button_to mark_delivered_admin_order_path(order), method: :post, class: "btn btn-sm btn-outline-brand icon-btn" do %>
-                <%= ui_icon(:check) %>
-                <span>Finalizar</span>
-              <% end %>
+        <% if action %>
+          <div class="queue-order-card__footer">
+            <%= button_to action[:path], method: :post, class: "btn btn-sm btn-outline-brand icon-btn" do %>
+              <%= ui_icon(action[:icon]) %>
+              <span><%= action[:label] %></span>
             <% end %>
           </div>
-        </div>
+        <% end %>
       </article>
     <% end %>
   </section>

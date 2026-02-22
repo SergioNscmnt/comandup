@@ -44,11 +44,12 @@ class CartsController < ApplicationController
       product = products[product_id]
       next unless product
 
-      qty = quantity.to_i
-      note = ""
       if quantity.is_a?(Hash)
         qty = quantity["quantity"].to_i
         note = quantity["note"].to_s
+      else
+        qty = quantity.to_i
+        note = ""
       end
       next if qty <= 0
 

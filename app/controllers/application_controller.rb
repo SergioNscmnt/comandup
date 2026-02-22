@@ -34,7 +34,7 @@ class ApplicationController < ActionController::Base
     return if current_customer
 
     session[:return_to] = request.fullpath if request.get?
-    redirect_to customer_login_path, alert: "Entre com Google para continuar."
+    redirect_to customer_login_path, alert: "Entre com sua conta para continuar."
   end
 
   def cart_storage

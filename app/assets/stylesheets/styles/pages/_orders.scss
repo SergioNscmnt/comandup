@@ -1,0 +1,52 @@
+.order-hero {
+  padding: 1.1rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.status-pill {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: #ecf3f8;
+  color: #325268;
+  gap: 0.25rem;
+}
+
+.status-draft {
+  background: #eef2ff;
+  color: #3949ab;
+}
+
+.status-received {
+  background: #e6f7ff;
+  color: #0b6ea8;
+}
+
+.status-in_production {
+  background: #fff4e5;
+  color: #b76a0a;
+}
+
+.status-ready {
+  background: #e9f8ef;
+  color: #1f8a4c;
+}
+
+.status-delivered {
+  background: #e8f1ff;
+  color: #315f9b;
+}
+
+.status-canceled {
+  background: #ffe9ea;
+  color: #b53e45;
+}
+
+.status-payment_failed {
+  background: #f8e9ff;
+  color: #7b3fb7;
+}

@@ -1,0 +1,178 @@
+:root {
+  --brand-ink: #0e2431;
+  --brand-deep: #14384d;
+  --brand-accent: #ff8a3d;
+  --brand-accent-strong: #f06d18;
+  --surface: #ffffff;
+  --surface-soft: #f3f7f9;
+  --line: #d8e4ea;
+  --text-main: #0f1f2b;
+  --text-muted: #5c7485;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Avenir Next", "Nunito Sans", "Segoe UI", sans-serif;
+  color: var(--text-main);
+  background: radial-gradient(circle at 10% -10%, #d8edf8 0%, #f4f9fc 45%, #f8fafc 100%);
+}
+
+.page-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image:
+    radial-gradient(600px 200px at 90% -10%, rgba(255, 138, 61, 0.12), transparent 60%),
+    radial-gradient(700px 220px at -10% 120%, rgba(20, 56, 77, 0.1), transparent 65%);
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid rgba(216, 228, 234, 0.8);
+}
+
+.app-nav {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  padding-left: clamp(0.75rem, 2vw, 1.5rem);
+  padding-right: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+.brand {
+  color: var(--brand-deep);
+  text-decoration: none;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, var(--brand-accent), var(--brand-accent-strong));
+  box-shadow: 0 0 0 5px rgba(255, 138, 61, 0.2);
+}
+
+.nav-links {
+  display: inline-flex;
+  gap: 1rem;
+  align-items: center;
+  margin-left: auto;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  color: var(--text-main);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.nav-links a:hover {
+  color: var(--brand-deep);
+}
+
+.ui-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: 0 0 auto;
+}
+
+.icon-link,
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+}
+
+.cart-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cart-badge {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-accent);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.cart-total {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.nav-links form {
+  margin: 0;
+}
+
+.nav-logout {
+  line-height: 1;
+  padding: 0.35rem 0.7rem;
+}
+
+.nav-auth-dropdown {
+  position: relative;
+}
+
+.nav-auth-trigger {
+  list-style: none;
+}
+
+.nav-auth-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.nav-auth-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  min-width: 220px;
+  padding: 0.35rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(19, 51, 70, 0.14);
+  display: grid;
+  gap: 0.2rem;
+  z-index: 40;
+}
+
+.nav-auth-menu a {
+  border-radius: 8px;
+  padding: 0.35rem 0.45rem;
+}
+
+.nav-auth-menu a:hover {
+  background: #eef5f9;
+}
+
+.app-main {
+  padding: 1rem 0 2.5rem;
+}

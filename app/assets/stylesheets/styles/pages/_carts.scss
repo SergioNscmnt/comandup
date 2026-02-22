@@ -1,0 +1,47 @@
+.queue-list {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+
+.queue-card {
+  padding: 0.75rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.queue-left,
+.queue-right {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.queue-right {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.queue-right form {
+  margin: 0;
+}
+
+.cart-qty-btn {
+  min-width: 32px;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.queue-rank {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: #eff5f9;
+  color: var(--brand-deep);
+  font-weight: 800;
+}

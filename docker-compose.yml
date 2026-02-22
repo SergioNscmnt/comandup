@@ -18,8 +18,11 @@ services:
       REDIS_URL: redis://redis:6379/0
       REDIS_CACHE_URL: redis://redis:6379/2
       LOG_JSON: "true"
+      MODO_PAGAMENTO: ${MODO_PAGAMENTO:-POS_PAGO}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      DELIVERY_FEE_PER_KM_CENTS: ${DELIVERY_FEE_PER_KM_CENTS:-300}
+      DELIVERY_MIN_FEE_CENTS: ${DELIVERY_MIN_FEE_CENTS:-1000}
     volumes:
       - .:/rails
       - bundle_data:/usr/local/bundle
@@ -51,8 +54,11 @@ services:
       REDIS_URL: redis://redis:6379/0
       REDIS_CACHE_URL: redis://redis:6379/2
       LOG_JSON: "true"
+      MODO_PAGAMENTO: ${MODO_PAGAMENTO:-POS_PAGO}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      DELIVERY_FEE_PER_KM_CENTS: ${DELIVERY_FEE_PER_KM_CENTS:-300}
+      DELIVERY_MIN_FEE_CENTS: ${DELIVERY_MIN_FEE_CENTS:-1000}
     volumes:
       - .:/rails
       - bundle_data:/usr/local/bundle

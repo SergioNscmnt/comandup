@@ -2,25 +2,21 @@ class ApplicationController < ActionController::Base
   include Pundit::Authorization
 
   rescue_from Pundit::NotAuthorizedError, with: :forbidden
-  helper_method :current_admin, :current_customer, :current_user, :cart_count, :cart_total_cents, :cart_quantity_for, :cart_note_for, :current_table_number, :table_session_active?
+  helper_method :current_admin, :current_customer, :cart_count, :cart_total_cents, :cart_quantity_for, :cart_note_for, :current_table_number, :table_session_active?
 
   private
 
   def current_admin
-    @current_admin ||= User.admin.find_by(id: session[:admin_user_id]) if session[:admin_user_id].present?
+    @current_admin ||= current_user if current_user&.admin?
   end
 
   def current_customer
     @current_customer ||= begin
-      by_session = User.customer.find_by(id: session[:customer_user_id]) if session[:customer_user_id].present?
+      by_session = current_user if current_user&.customer?
       requested_id = request.headers["X-Customer-Id"]
       by_header = User.customer.find_by(id: requested_id) if requested_id.present?
       by_session || by_header
     end
-  end
-
-  def current_user
-    current_admin || current_customer
   end
 
   def pundit_user

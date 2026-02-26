@@ -1,0 +1,27 @@
+<div class="container py-4 py-lg-5">
+  <section class="hero-card fade-in-up auth-card mx-auto">
+    <p class="eyebrow mb-1">Acesso do cliente</p>
+    <h1 class="h3 mb-2"><%= ui_icon(:login) %> Recuperar senha</h1>
+    <p class="text-secondary mb-4">Informe seu email para receber o link de redefinição.</p>
+
+    <%= form_with model: resource, as: resource_name, url: user_password_path, method: :post, local: true do |f| %>
+      <div class="mb-3">
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control", required: true, placeholder: "seu@email.com" %>
+      </div>
+      <div class="row g-2">
+        <div class="col-12 d-grid">
+          <button type="submit" class="btn btn-brand icon-btn justify-content-center">
+            <%= ui_icon(:check) %>
+            <span>Enviar instruções</span>
+          </button>
+        </div>
+        <div class="col-12 d-grid">
+          <%= link_to customer_login_path, class: "btn btn-outline-brand icon-btn justify-content-center" do %>
+            <%= ui_icon(:login) %>
+            <span>Voltar ao login</span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </section>
+</div>

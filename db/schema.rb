@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_22_131000) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_26_052000) do
   create_table "audit_logs", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.bigint "order_id", null: false
     t.bigint "user_id"
@@ -55,6 +55,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_22_131000) do
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "description"
     t.index ["active"], name: "index_combos_on_active"
     t.check_constraint "`price_cents` >= 0", name: "chk_combos_price_cents"
   end
@@ -142,6 +143,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_22_131000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "category_id", null: false
+    t.string "image_url"
     t.index ["active"], name: "index_products_on_active"
     t.index ["category_id"], name: "index_products_on_category_id"
     t.check_constraint "`prep_minutes` > 0", name: "chk_products_prep_minutes"
@@ -156,6 +158,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_22_131000) do
     t.datetime "ends_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "discount_kind", default: 0, null: false
+    t.integer "discount_value_cents", default: 0, null: false
+    t.integer "quantity"
+    t.string "coupon_category", default: "all", null: false
     t.index ["active"], name: "index_promotions_on_active"
     t.check_constraint "`discount_percent` >= 0 and `discount_percent` <= 100", name: "chk_promotions_discount_percent"
   end
@@ -164,7 +170,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_22_131000) do
     t.string "name", null: false
     t.string "email", null: false
     t.integer "role", default: 0, null: false
-    t.string "password_digest", null: false
+    t.string "password_digest"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "provider"
@@ -172,8 +178,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_22_131000) do
     t.string "avatar_url"
     t.string "company_address"
     t.string "company_cep"
+    t.decimal "company_delivery_radius_km", precision: 8, scale: 2
+    t.integer "company_delivery_fee_per_km_cents"
+    t.integer "company_delivery_min_fee_cents"
+    t.integer "company_delivery_min_order_cents"
+    t.integer "company_prep_minutes_base"
+    t.string "encrypted_password", default: "", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.check_constraint "`role` in (0,1)", name: "chk_users_role"
   end
 

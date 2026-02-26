@@ -1,5 +1,5 @@
 <div class="container py-4 py-lg-5">
-  <section class="hero-card fade-in-up auth-card mx-auto" data-controller="signup-toggle">
+  <section class="hero-card fade-in-up auth-card mx-auto" data-controller="signup-toggle" data-signup-toggle-scroll-on-open-value="true">
     <p class="eyebrow mb-1">Acesso do cliente</p>
     <h1 class="h3 mb-2"><%= ui_icon(:login) %> Entrar</h1>
     <p class="text-secondary mb-4">Entre com seu email e senha para acompanhar seus pedidos.</p>
@@ -8,8 +8,17 @@
       <div class="mb-2">
         <%= f.email_field :email, value: @login_email, class: "form-control", required: true, autocomplete: "email", placeholder: "seu@email.com" %>
       </div>
-      <div class="mb-3">
-        <%= f.password_field :password, class: "form-control", required: true, autocomplete: "current-password", placeholder: "Sua senha" %>
+      <div class="mb-3" data-controller="password-visibility">
+        <div class="input-group">
+          <%= f.password_field :password, class: "form-control", required: true, autocomplete: "current-password", placeholder: "Sua senha", data: { password_visibility_target: "input" } %>
+          <button type="button" class="btn btn-outline-brand icon-btn justify-content-center" data-password-visibility-target="button" data-action="password-visibility#toggle" aria-label="Mostrar senha" title="Mostrar senha">
+            <span data-password-visibility-target="showIcon"><%= ui_icon(:eye) %></span>
+            <span data-password-visibility-target="hideIcon" hidden><%= ui_icon(:eye_slash) %></span>
+          </button>
+        </div>
+      </div>
+      <div class="mb-3 text-end">
+        <%= link_to "Esqueci minha senha", new_user_password_path, class: "small" %>
       </div>
       <div class="row g-2">
         <div class="col-6 d-grid">
@@ -36,11 +45,23 @@
         <div class="mb-2">
           <%= f.email_field :email, value: @signup_email, class: "form-control", required: true, autocomplete: "email", placeholder: "seu@email.com" %>
         </div>
-        <div class="mb-2">
-          <%= f.password_field :password, class: "form-control", required: true, autocomplete: "new-password", minlength: 8, placeholder: "Senha (min. 8 caracteres)" %>
+        <div class="mb-2" data-controller="password-visibility">
+          <div class="input-group">
+            <%= f.password_field :password, class: "form-control", required: true, autocomplete: "new-password", minlength: 8, placeholder: "Senha (min. 8 caracteres)", data: { password_visibility_target: "input" } %>
+            <button type="button" class="btn btn-outline-brand icon-btn justify-content-center" data-password-visibility-target="button" data-action="password-visibility#toggle" aria-label="Mostrar senha" title="Mostrar senha">
+              <span data-password-visibility-target="showIcon"><%= ui_icon(:eye) %></span>
+              <span data-password-visibility-target="hideIcon" hidden><%= ui_icon(:eye_slash) %></span>
+            </button>
+          </div>
         </div>
-        <div class="mb-3">
-          <%= f.password_field :password_confirmation, class: "form-control", required: true, autocomplete: "new-password", minlength: 8, placeholder: "Confirmar senha" %>
+        <div class="mb-3" data-controller="password-visibility">
+          <div class="input-group">
+            <%= f.password_field :password_confirmation, class: "form-control", required: true, autocomplete: "new-password", minlength: 8, placeholder: "Confirmar senha", data: { password_visibility_target: "input" } %>
+            <button type="button" class="btn btn-outline-brand icon-btn justify-content-center" data-password-visibility-target="button" data-action="password-visibility#toggle" aria-label="Mostrar senha" title="Mostrar senha">
+              <span data-password-visibility-target="showIcon"><%= ui_icon(:eye) %></span>
+              <span data-password-visibility-target="hideIcon" hidden><%= ui_icon(:eye_slash) %></span>
+            </button>
+          </div>
         </div>
         <div class="d-grid">
           <button type="submit" class="btn btn-outline-brand icon-btn">

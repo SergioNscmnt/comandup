@@ -17,8 +17,8 @@ class Order < ApplicationRecord
   }
   enum order_type: { table: 0, pickup: 1, delivery: 2 }, _prefix: :order_type
 
-  scope :open_queue, -> { where(status: [statuses[:received], statuses[:in_production]]).order(created_at: :asc) }
-  scope :for_customer_channel, -> { where(order_type: [order_types[:pickup], order_types[:delivery]]) }
+  scope :open_queue, -> { where(status: [statuses[:received], statuses[:in_production]]).order(created_at: :asc, id: :asc) }
+  scope :for_customer_channel, -> { where(order_type: %i[pickup delivery]) }
 
   validates :subtotal_cents, :discount_cents, :total_cents, :delivery_fee_cents, numericality: { greater_than_or_equal_to: 0 }
   validates :delivery_distance_km, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
@@ -37,5 +37,12 @@ class Order < ApplicationRecord
 
   def human_order_type
     I18n.t("activerecord.attributes.order.order_types.#{order_type}", default: order_type.humanize)
+  end
+
+  def human_table_label
+    number = table_number.to_s[/\d+/]
+    return "Mesa #{number}" if number.present?
+
+    "Mesa"
   end
 end

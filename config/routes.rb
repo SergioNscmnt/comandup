@@ -1,6 +1,11 @@
 require "sidekiq/web"
 
 Rails.application.routes.draw do
+  devise_for :users,
+             skip: [:sessions, :registrations],
+             path: "",
+             path_names: { password: "recuperar-senha" },
+             controllers: { passwords: "users/passwords" }
   get "up" => "rails/health#show", as: :rails_health_check
 
   if Rails.env.development?
@@ -18,10 +23,12 @@ Rails.application.routes.draw do
   get "login/google", to: "sessions#google_start", as: :customer_google_login
   get "login/google/callback", to: "sessions#google_callback", as: :customer_google_callback
   delete "logout", to: "sessions#destroy", as: :customer_logout
+  resource :account, only: [:show, :update], path: "minha-conta", controller: "accounts"
 
   resource :cart, only: [:show, :update, :destroy] do
     get :delivery_quote
   end
+  get "geo/suggestions", to: "geo#suggestions"
 
   resources :orders, only: [:index, :create, :show] do
     member do
@@ -38,6 +45,14 @@ Rails.application.routes.draw do
 
     resource :queue, only: :show, controller: "queue"
     resource :company_profile, only: [:edit, :update], controller: "company_profiles"
+    resources :products, only: [:new, :create, :edit, :update, :destroy]
+    resources :combos, only: [:new, :create]
+    resources :promotions, only: [:new, :create]
+    resources :categories, only: [:new, :create, :edit, :update] do
+      collection do
+        patch :reorder
+      end
+    end
 
     resources :orders, only: [] do
       member do

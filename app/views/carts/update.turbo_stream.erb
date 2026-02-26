@@ -25,5 +25,5 @@
 <% end %>
 
 <%= turbo_stream.replace "toast-area" do %>
-  <%= render "shared/toast_area", message: @toast_message %>
+  <%= render "shared/toast_area", message: @toast_message, kind: :notice %>
 <% end %>

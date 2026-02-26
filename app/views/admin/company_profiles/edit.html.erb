@@ -1,23 +1,89 @@
 <div class="container py-4 py-lg-5">
-  <section class="hero-card fade-in-up">
-    <h1 class="h4 mb-2"><%= ui_icon(:list) %> Endereço da empresa</h1>
-    <p class="text-secondary mb-4">Esse endereço é usado como origem para calcular a taxa de delivery.</p>
+  <section class="hero-card fade-in-up company-profile-card">
+    <div class="company-profile-head">
+      <p class="eyebrow mb-1">Administração</p>
+      <h1 class="h4 mb-2"><%= ui_icon(:list) %> Perfil de entrega da empresa</h1>
+      <p class="text-secondary mb-0">Defina endereço de origem e regras de operação para cálculo de delivery e ETA (tempo estimado de preparo).</p>
+    </div>
 
-    <%= form_with model: @company_account, url: admin_company_profile_path, method: :patch, local: true do |f| %>
-      <div class="mb-3">
-        <label class="form-label mb-1">Endereço completo da empresa</label>
-        <%= f.text_field :company_address, class: "form-control", placeholder: "Ex: Av. Paulista, 1000 - Bela Vista, São Paulo - SP" %>
+    <%= form_with model: @company_account, url: admin_company_profile_path, method: :patch, local: true, class: "company-profile-form", data: { controller: "company-viacep operational-mask" } do |f| %>
+      <div class="company-profile-section">
+        <div class="company-profile-section__title">
+          <h2 class="h6 mb-1"><%= ui_icon(:building) %> Endereço da empresa</h2>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-5">
+            <label class="form-label mb-1">CEP da empresa</label>
+            <div class="row g-2 align-items-end">
+              <div class="col-12 col-md-7">
+                <%= f.text_field :company_cep, class: "form-control", placeholder: "00000-000", maxlength: 9, inputmode: "numeric", data: { company_viacep_target: "cep", action: "input->company-viacep#maskCep blur->company-viacep#search" } %>
+              </div>
+              <div class="col-12 col-md-5">
+                <button type="button" class="btn btn-outline-brand w-100" data-action="company-viacep#search">Buscar CEP</button>
+              </div>
+            </div>
+            <small class="text-secondary d-block mt-2 company-profile-status" data-company-viacep-target="status"></small>
+          </div>
+
+          <div class="col-12 col-lg-7">
+            <label class="form-label mb-1">Rua</label>
+            <%= f.text_field :company_street, value: @address_parts[:street], class: "form-control", placeholder: "Ex: Av. Paulista", autocomplete: "address-line1", data: { controller: "osm-autocomplete", osm_autocomplete_field_value: "street", company_viacep_target: "street", action: "input->company-viacep#compose input->osm-autocomplete#search" } %>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label mb-1">Número</label>
+            <%= f.text_field :company_number, value: @address_parts[:number], class: "form-control", placeholder: "Ex: 1000", data: { company_viacep_target: "number", action: "input->company-viacep#compose" } %>
+          </div>
+          <div class="col-12 col-md-8">
+            <label class="form-label mb-1">Bairro</label>
+            <%= f.text_field :company_neighborhood, value: @address_parts[:neighborhood], class: "form-control", placeholder: "Ex: Bela Vista", autocomplete: "address-level3", data: { controller: "osm-autocomplete", osm_autocomplete_field_value: "neighborhood", company_viacep_target: "neighborhood", action: "input->company-viacep#compose input->osm-autocomplete#search" } %>
+          </div>
+          <div class="col-12">
+            <label class="form-label mb-1">Complemento</label>
+            <%= f.text_field :company_complement, value: @address_parts[:complement], class: "form-control", placeholder: "Ex: Loja térrea, Bloco B", data: { company_viacep_target: "complement", action: "input->company-viacep#compose" } %>
+          </div>
+        </div>
       </div>
 
-      <div class="mb-3 col-12 col-md-4 p-0">
-        <label class="form-label mb-1">CEP da empresa</label>
-        <%= f.text_field :company_cep, class: "form-control", placeholder: "00000-000", maxlength: 9, inputmode: "numeric" %>
+      <%= f.hidden_field :company_address, data: { company_viacep_target: "address" } %>
+
+      <div class="company-profile-section">
+        <div class="company-profile-section__title">
+          <h2 class="h6 mb-1"><%= ui_icon(:clock) %> Parâmetros operacionais</h2><br>
+          <small class="text-secondary">Valores de configuração que impactam o cálculo de preço e tempo de preparo do delivery.</small>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <label class="form-label mb-1">Raio máximo de entrega (km)</label>
+            <%= f.text_field :company_delivery_radius_km, class: "form-control", placeholder: "Ex: 8,0", inputmode: "decimal", data: { operational_mask_target: "radius", action: "input->operational-mask#maskRadius" } %>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label mb-1">Taxa por km (R$)</label>
+            <%= f.text_field :company_delivery_fee_per_km_reais, value: @operational_fields[:delivery_fee_per_km_reais], class: "form-control", placeholder: "Ex: 3,00", inputmode: "decimal", data: { operational_mask_target: "currency", action: "input->operational-mask#maskCurrency" } %>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label mb-1">Taxa mínima delivery (R$)</label>
+            <%= f.text_field :company_delivery_min_fee_reais, value: @operational_fields[:delivery_min_fee_reais], class: "form-control", placeholder: "Ex: 10,00", inputmode: "decimal", data: { operational_mask_target: "currency", action: "input->operational-mask#maskCurrency" } %>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label mb-1">Pedido mínimo delivery (R$)</label>
+            <%= f.text_field :company_delivery_min_order_reais, value: @operational_fields[:delivery_min_order_reais], class: "form-control", placeholder: "Ex: 25,00", inputmode: "decimal", data: { operational_mask_target: "currency", action: "input->operational-mask#maskCurrency" } %>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="form-label mb-1">Tempo base de preparo (min)</label>
+            <%= f.text_field :company_prep_minutes_base, class: "form-control", placeholder: "Ex: 60", inputmode: "numeric", data: { operational_mask_target: "integer", action: "input->operational-mask#maskInteger" } %>
+          </div>
+        </div>
       </div>
 
-      <%= f.button class: "btn btn-brand icon-btn" do %>
-        <%= ui_icon(:check) %>
-        <span>Salvar endereço</span>
-      <% end %>
+      <div class="company-profile-actions">
+        <%= f.button class: "btn btn-brand icon-btn" do %>
+          <%= ui_icon(:check) %>
+          <span>Salvar configurações</span>
+        <% end %>
+      </div>
     <% end %>
   </section>
 </div>

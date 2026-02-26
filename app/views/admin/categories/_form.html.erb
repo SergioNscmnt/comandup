@@ -1,0 +1,19 @@
+<%= form_with model: category, url: form_url, method: form_method, class: "admin-modal-form mt-3", data: { turbo_frame: "_top" } do |f| %>
+  <div class="row g-2">
+    <div class="col-12 col-md-8">
+      <label class="form-label mb-1">Nome da categoria</label>
+      <%= f.text_field :name, class: "form-control", required: true, placeholder: "Ex: Lanches" %>
+    </div>
+    <div class="col-12 col-md-4">
+      <label class="form-label mb-1">Posição</label>
+      <%= f.number_field :position, class: "form-control", min: 0, step: 1, placeholder: "Ex: 1" %>
+    </div>
+  </div>
+
+  <div class="admin-modal-actions mt-3">
+    <%= f.button class: "btn btn-brand icon-btn" do %>
+      <%= ui_icon(:check) %>
+      <span><%= submit_label %></span>
+    <% end %>
+  </div>
+<% end %>

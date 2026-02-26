@@ -1,22 +1,48 @@
-@media (max-width: 767.98px) {
+@media (max-width: 575.98px) {
   .app-nav {
-    min-height: 62px;
-    align-items: flex-start;
+    flex-wrap: wrap;
+    min-height: 0;
+    align-items: stretch;
+    row-gap: 0.55rem;
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .brand {
+    width: 100%;
   }
 
   .nav-links {
-    gap: 0.65rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.55rem;
     width: 100%;
     margin-left: 0;
     justify-content: flex-start;
+  }
+
+  .nav-links a,
+  .nav-links .nav-action-link,
+  .nav-auth-trigger {
+    width: 100%;
+    justify-content: center;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.82);
   }
 
   .nav-links a {
     font-size: 0.85rem;
   }
 
-  .cart-total {
-    display: none;
+  .nav-links form {
+    display: block;
+    width: 100%;
+  }
+
+  .nav-auth-dropdown {
+    width: 100%;
   }
 
   .queue-card {
@@ -64,19 +90,47 @@
     justify-content: flex-start;
   }
 
-  .nav-auth-dropdown {
-    width: 100%;
-  }
-
   .nav-auth-trigger {
     width: 100%;
     justify-content: center;
   }
 
   .nav-auth-menu {
-    left: 0;
-    right: auto;
+    position: static;
+    margin-top: 0.35rem;
     width: 100%;
+    min-width: 0;
+    box-shadow: none;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 991.98px) {
+  .app-nav {
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 0.6rem;
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 0.9rem;
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+
+  .nav-links a,
+  .nav-links .nav-action-link,
+  .nav-auth-trigger {
+    padding: 0.35rem 0.2rem;
+  }
+
+  .nav-auth-menu {
+    right: auto;
+    left: 0;
   }
 }
 
@@ -92,19 +146,15 @@
 }
 
 @media (max-width: 991.98px) {
+  .cart-total {
+    display: none;
+  }
+}
+
+@media (max-width: 991.98px) {
   .app-nav {
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 0.65rem;
+    overflow-x: clip;
   }
-
-  .nav-links {
-    gap: 0.75rem;
-    width: 100%;
-    margin-left: 0;
-    justify-content: flex-start;
-  }
-
   .section-head {
     align-items: flex-start !important;
   }

@@ -1,11 +1,70 @@
-<div id="products-category-nav" class="category-nav mt-3">
-  <%= link_to products_path, class: "category-chip #{'is-active' if @selected_category_id.blank?}" do %>
-    Todas
+<% category_slots = @categories.size + 1 %>
+<% carousel_enabled = category_slots >= 12 %>
+<% sortable_enabled = current_admin.present? %>
+<% controllers = [] %>
+<% controllers << "category-carousel" if carousel_enabled %>
+<% controllers << "category-sort" if sortable_enabled %>
+
+<div id="products-category-nav"
+     class="category-nav mt-3 <%= 'category-nav--carousel' if carousel_enabled %>"
+     <% if controllers.any? %>data-controller="<%= controllers.join(' ') %>"<% end %>
+     <% if sortable_enabled %>data-category-sort-url-value="<%= reorder_admin_categories_path %>"<% end %>>
+  <% if carousel_enabled %>
+    <button type="button"
+            class="btn btn-sm btn-outline-brand icon-btn category-nav__control"
+            data-category-carousel-target="prevButton"
+            data-action="category-carousel#prev"
+            aria-label="Categorias anteriores">
+      <span aria-hidden="true">&lsaquo;</span>
+    </button>
   <% end %>
 
-  <% @categories.each do |category| %>
-    <%= link_to products_path(category_id: category.id), class: "category-chip #{'is-active' if @selected_category_id == category.id}" do %>
-      <%= category.name %>
+  <div class="category-nav__track"
+       <% if carousel_enabled %>data-category-carousel-target="track"<% end %>
+       <% if sortable_enabled %>data-category-sort-target="track" data-action="dragover->category-sort#dragOver drop->category-sort#drop"<% end %>>
+    <%= link_to products_path, class: "category-mini-card #{'is-active' if @selected_category_id.blank?}" do %>
+      <span class="category-mini-card__title">Todas</span>
     <% end %>
+
+    <% @categories.each do |category| %>
+      <div class="category-mini-card-wrap <%= 'is-draggable' if sortable_enabled %>"
+           <% if sortable_enabled %>
+           draggable="true"
+           data-category-sort-target="item"
+           data-category-id="<%= category.id %>"
+           data-action="dragstart->category-sort#dragStart dragend->category-sort#dragEnd"
+           <% end %>>
+        <%= link_to products_path(category_id: category.id),
+                    class: "category-mini-card #{'is-active' if @selected_category_id == category.id}",
+                    draggable: false do %>
+          <span class="category-mini-card__title"><%= category.name %></span>
+        <% end %>
+
+        <% if current_admin %>
+          <% if sortable_enabled %>
+            <span class="category-mini-card__drag-handle" title="Arraste para reordenar" aria-hidden="true">⋮⋮</span>
+          <% end %>
+          <%= link_to edit_admin_category_path(category),
+                      class: "btn btn-sm btn-outline-brand icon-btn category-mini-card__edit",
+                      data: { turbo_frame: "admin_catalog_modal" },
+                      draggable: false,
+                      title: "Editar categoria",
+                      aria: { label: "Editar categoria #{category.name}" } do %>
+            <%= ui_icon(:edit) %>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
+  </div>
+
+  <% if carousel_enabled %>
+    <button type="button"
+            class="btn btn-sm btn-outline-brand icon-btn category-nav__control"
+            data-category-carousel-target="nextButton"
+            data-action="category-carousel#next"
+            aria-label="Próximas categorias">
+      <span aria-hidden="true">&rsaquo;</span>
+    </button>
   <% end %>
 </div>

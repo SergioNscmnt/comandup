@@ -1,0 +1,20 @@
+<%= turbo_frame_tag "admin_catalog_modal" do %>
+  <div class="admin-modal-backdrop" data-controller="frame-modal" data-action="click->frame-modal#closeIfBackdrop">
+    <section class="admin-modal-card">
+      <header class="admin-modal-head">
+        <h2 class="h5 mb-0"><%= ui_icon(:list) %> Nova Categoria</h2>
+        <button type="button" class="btn btn-sm btn-outline-brand" data-action="frame-modal#close">Fechar</button>
+      </header>
+
+      <% if flash.now[:alert].present? %>
+        <div class="alert alert-danger mt-3 mb-0"><%= flash.now[:alert] %></div>
+      <% end %>
+
+      <%= render "form",
+                 category: @category,
+                 form_url: admin_categories_path,
+                 form_method: :post,
+                 submit_label: "Criar categoria" %>
+    </section>
+  </div>
+<% end %>

@@ -69,6 +69,14 @@ body {
   box-shadow: 0 0 0 5px rgba(255, 138, 61, 0.2);
 }
 
+.brand-icon {
+  width: 1.7rem;
+  height: 1.7rem;
+  display: inline-block;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
 .nav-links {
   display: inline-flex;
   gap: 1rem;
@@ -76,6 +84,11 @@ body {
   margin-left: auto;
   justify-content: flex-end;
   flex-wrap: wrap;
+  min-width: 0;
+}
+
+.nav-links > * {
+  min-width: 0;
 }
 
 .nav-links a {
@@ -100,6 +113,18 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.38rem;
+}
+
+.nav-links .icon-link,
+.nav-links .nav-action-link,
+.nav-auth-trigger {
+  border-radius: 10px;
+  transition: background-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.nav-links .icon-link,
+.nav-links .nav-action-link {
+  padding: 0.35rem 0.45rem;
 }
 
 .cart-link {
@@ -132,9 +157,37 @@ body {
   margin: 0;
 }
 
-.nav-logout {
-  line-height: 1;
-  padding: 0.35rem 0.7rem;
+.nav-links .nav-action-link {
+  border: 0;
+  background: transparent;
+  padding: 0.35rem 0.45rem;
+  color: var(--text-main);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.nav-links .nav-action-link:hover,
+.nav-auth-trigger:hover {
+  color: var(--brand-deep);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-links .icon-link:hover,
+  .nav-links .nav-action-link:hover,
+  .nav-auth-trigger:hover {
+    background: #eef5f9;
+  }
+}
+
+.nav-links .icon-link:focus-visible,
+.nav-links .nav-action-link:focus-visible,
+.nav-auth-trigger:focus-visible,
+.nav-auth-menu a:focus-visible {
+  outline: 2px solid rgba(240, 109, 24, 0.45);
+  outline-offset: 2px;
 }
 
 .nav-auth-dropdown {
@@ -142,6 +195,11 @@ body {
 }
 
 .nav-auth-trigger {
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 0.35rem 0.45rem;
   list-style: none;
 }
 

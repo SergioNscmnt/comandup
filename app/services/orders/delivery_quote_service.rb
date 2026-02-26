@@ -21,6 +21,10 @@ module Orders
       destination = geocode_cep!(@cep)
 
       distance_km = haversine_km(origin[:lat], origin[:lng], destination[:lat], destination[:lng]).round(2)
+      if max_delivery_radius_km && distance_km > max_delivery_radius_km
+        raise ArgumentError, "Entrega indisponível para este CEP: fora do raio de #{max_delivery_radius_km.to_s.tr('.', ',')} km."
+      end
+
       fee_cents = [(distance_km * fee_per_km_cents).round, minimum_fee_cents].max
 
       {
@@ -36,6 +40,9 @@ module Orders
     end
 
     def fee_per_km_cents
+      company_value = company_account&.company_delivery_fee_per_km_cents.to_i
+      return company_value if company_value.positive?
+
       value = settings.delivery_fee_per_km_cents.to_i
       return RATE_PER_KM_CENTS if value <= 0
 
@@ -43,6 +50,9 @@ module Orders
     end
 
     def minimum_fee_cents
+      company_value = company_account&.company_delivery_min_fee_cents.to_i
+      return company_value if company_value.positive?
+
       value = settings.delivery_min_fee_cents.to_i
       return MIN_FEE_CENTS if value <= 0
 
@@ -50,7 +60,7 @@ module Orders
     end
 
     def store_coordinates
-      company = User.company_account
+      company = company_account
       raise ArgumentError, "Cadastre uma conta de administrador da empresa." unless company
 
       query = company.company_location_query
@@ -59,6 +69,15 @@ module Orders
       end
 
       geocode_address!(query)
+    end
+
+    def company_account
+      @company_account ||= User.company_account
+    end
+
+    def max_delivery_radius_km
+      value = company_account&.company_delivery_radius_km
+      value.present? ? value.to_f : nil
     end
 
     def geocode_cep!(cep)

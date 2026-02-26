@@ -1,26 +1,33 @@
-<div class="container py-4 py-lg-5">
+<div
+  class="container py-4 py-lg-5"
+  data-controller="order-live"
+  data-order-live-order-id-value="<%= @order.id %>"
+  data-order-live-table-order-value="<%= @order.order_type_table? %>"
+>
   <section class="order-hero fade-in-up">
     <div>
       <p class="eyebrow mb-1">Acompanhamento</p>
       <h1 class="h3 mb-1"><%= ui_icon(:receipt) %> Pedido #<%= @order.id %></h1>
       <p class="text-secondary mb-0">
-        <%= @order.order_type_table? ? "Pedido de mesa #{ @order.table_number }" : "Pedido #{@order.human_order_type}" %> com status em tempo real.
+        <%= @order.order_type_table? ? "Pedido de #{@order.human_table_label}" : "Pedido #{@order.human_order_type}" %> com status em tempo real.
       </p>
     </div>
-    <span class="status-pill status-<%= @order.status %>"><%= ui_icon(:clock) %> <%= @order.human_status %></span>
+    <span class="status-pill status-<%= @order.status %>" data-order-live-target="statusPill">
+      <%= ui_icon(:clock) %> <span data-order-live-target="statusLabel"><%= @order.human_status %></span>
+    </span>
   </section>
 
   <section class="row g-3 mt-2">
     <div class="col-12 col-md-4">
       <article class="metric-card fade-in-up fade-delay-1">
         <small>Posição na fila</small>
-        <strong><%= ui_icon(:list) %> <%= @order.queue_position || '-' %></strong>
+        <strong><%= ui_icon(:list) %> <span data-order-live-target="queuePosition"><%= @order.queue_position || '-' %></span></strong>
       </article>
     </div>
     <div class="col-12 col-md-4">
       <article class="metric-card fade-in-up fade-delay-2">
         <small>Tempo estimado de preparo</small>
-        <strong><%= ui_icon(:clock) %> <%= @order.eta_minutes || '-' %> min</strong>
+        <strong><%= ui_icon(:clock) %> <span data-order-live-target="etaMinutes"><%= @order.eta_minutes || '-' %></span> min</strong>
       </article>
     </div>
     <div class="col-12 col-md-4">
@@ -47,7 +54,7 @@
        when "canceled" then "Pedido cancelado."
        else "Aguardando confirmação do pedido."
        end %>
-    <p class="mb-0"><strong><%= status_copy %></strong></p>
+    <p class="mb-0"><strong data-order-live-target="statusCopy"><%= status_copy %></strong></p>
   </section>
 
   <section class="queue-list mt-3">

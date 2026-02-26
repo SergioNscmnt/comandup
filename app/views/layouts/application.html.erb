@@ -3,6 +3,7 @@
   <head>
     <title>ComandUp</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= favicon_link_tag "/comandup-favicon.svg", type: "image/svg+xml" %>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -12,28 +13,34 @@
 
   <body>
     <div class="page-bg"></div>
+    <%= render "shared/toast_area" %>
 
     <header class="app-header">
       <div class="container-fluid app-nav">
         <%= link_to root_path, class: "brand" do %>
-          <span class="brand-dot"></span>
+          <%= image_tag "/comandup-favicon.svg", alt: "", class: "brand-icon", aria: { hidden: true } %>
           <span>ComandUp</span>
         <% end %>
 
         <nav class="nav-links">
+
+          <%= render "shared/nav_cart" %>
+
           <%= link_to products_path, class: "icon-link" do %>
             <%= ui_icon(:box) %>
             <span>Produtos</span>
           <% end %>
-
-          <%= render "shared/nav_cart" %>
 
           <% if current_customer %>
             <%= link_to orders_path, class: "icon-link" do %>
               <%= ui_icon(:receipt) %>
               <span>Meus pedidos</span>
             <% end %>
-            <%= button_to customer_logout_path, method: :delete, class: "btn btn-sm btn-outline-brand nav-logout" do %>
+            <%= link_to account_path, class: "icon-link" do %>
+              <%= ui_icon(:user) %>
+              <span>Minha conta</span>
+            <% end %>
+            <%= button_to customer_logout_path, method: :delete, class: "icon-link nav-action-link" do %>
               <%= ui_icon(:logout) %>
               <span>Sair cliente</span>
             <% end %>
@@ -42,13 +49,13 @@
           <% if current_admin %>
             <%= link_to admin_queue_path, class: "icon-link" do %>
               <%= ui_icon(:list) %>
-              <span>Fila Admin</span>
+              <span>Fila de Pedidos</span>
             <% end %>
             <%= link_to edit_admin_company_profile_path, class: "icon-link" do %>
               <%= ui_icon(:receipt) %>
               <span>Empresa</span>
             <% end %>
-            <%= button_to admin_logout_path, method: :delete, class: "btn btn-sm btn-outline-brand nav-logout" do %>
+            <%= button_to admin_logout_path, method: :delete, class: "icon-link nav-action-link" do %>
               <%= ui_icon(:logout) %>
               <span>Sair</span>
             <% end %>
@@ -56,18 +63,18 @@
 
           <% unless current_customer || current_admin %>
             <details class="nav-auth-dropdown">
-              <summary class="btn btn-sm btn-outline-brand icon-btn nav-auth-trigger">
+              <summary class="icon-link nav-auth-trigger">
                 <%= ui_icon(:login) %>
                 <span>Entrar</span>
               </summary>
               <div class="nav-auth-menu">
                 <%= link_to customer_login_path, class: "icon-link" do %>
                   <%= ui_icon(:login) %>
-                  <span>Entrar ou criar conta</span>
+                  <span>Área do Cliente</span>
                 <% end %>
                 <%= link_to admin_login_path, class: "icon-link" do %>
                   <%= ui_icon(:login) %>
-                  <span>Entrar como Administrador</span>
+                  <span>Área Administrativa</span>
                 <% end %>
               </div>
             </details>
@@ -77,19 +84,7 @@
     </header>
 
     <main class="app-main">
-      <% if notice.present? %>
-        <div class="container pt-3">
-          <div class="alert alert-success mb-0"><%= notice %></div>
-        </div>
-      <% end %>
-      <% if alert.present? %>
-        <div class="container pt-3">
-          <div class="alert alert-danger mb-0"><%= alert %></div>
-        </div>
-      <% end %>
       <%= yield %>
     </main>
-
-    <%= render "shared/toast_area" %>
   </body>
 </html>

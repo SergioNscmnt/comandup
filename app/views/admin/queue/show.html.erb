@@ -21,14 +21,14 @@
     <% @orders.each_with_index do |order, index| %>
       <% item_notes = order.order_items.filter_map { |item| item.notes.to_s.strip.presence } %>
       <% total_items = order.order_items.sum(&:quantity) %>
-      <% action = if order.received?
+      <% action = if order.received? && order.id == @next_order_id
                     { label: "Iniciar", path: start_production_admin_order_path(order), icon: :clock }
                   elsif order.in_production?
                     { label: "Pronto", path: finish_admin_order_path(order), icon: :check }
                   elsif order.ready?
                     { label: "Finalizar", path: mark_delivered_admin_order_path(order), icon: :check }
                   end %>
-      <article class="queue-card queue-order-card queue-order-card--<%= order.status %> fade-in-up fade-delay-admin-<%= index % 8 %>">
+      <article class="queue-card queue-order-card queue-order-card--<%= order.status %> fade-in-up fade-delay-admin-<%= index % 8 %>" data-controller="queue-card">
         <div class="queue-order-card__header">
           <div class="queue-order-card__title">
             <span class="queue-rank">#<%= order.queue_position || index + 1 %></span>
@@ -44,11 +44,7 @@
         </div>
 
         <div class="queue-order-card__facts">
-          <span class="queue-fact"><strong>Tipo:</strong> <%= order.human_order_type %>
-            <% if order.order_type_table? %>
-              (Mesa <%= order.table_number %>)
-            <% end %>
-          </span>
+          <span class="queue-fact"><strong>Tipo:</strong> <%= order.order_type_table? ? order.human_table_label : order.human_order_type %></span>
           <span class="queue-fact"><strong>Itens:</strong> <%= total_items %></span>
           <span class="queue-fact"><strong>Total:</strong> <span class="fact-value--total"><%= money(order.total_cents) %></span></span>
           <% if order.order_type_delivery? %>
@@ -59,7 +55,7 @@
           <% end %>
         </div>
 
-        <section class="queue-order-card__items">
+        <section class="queue-order-card__items" data-queue-card-target="items">
           <p class="section-title mb-1">Itens</p>
           <ul class="order-items-list">
             <% order.order_items.each do |item| %>
@@ -71,25 +67,27 @@
           </ul>
         </section>
 
-        <details class="queue-details">
+        <details class="queue-details" data-queue-card-target="details" data-action="toggle->queue-card#toggleDetails">
           <summary>Detalhes</summary>
-          <% if order.customer.present? %>
-            <p class="text-secondary mb-1"><strong>Contato:</strong> <%= order.customer.email %></p>
-          <% end %>
-          <% if order.order_type_delivery? && order.delivery_address.present? %>
-            <p class="text-secondary mb-1"><strong>Endereço:</strong> <%= order.delivery_address %></p>
-            <p class="text-secondary mb-1"><strong>Distância:</strong> <%= order.delivery_distance_km ? "#{order.delivery_distance_km} km" : "-" %></p>
-          <% end %>
-          <% if item_notes.any? %>
-            <p class="text-secondary mb-1"><strong>Observações:</strong></p>
-            <ul class="notes-list">
-              <% item_notes.each do |note| %>
-                <li><%= note %></li>
-              <% end %>
-            </ul>
-          <% elsif !order.customer.present? && !(order.order_type_delivery? && order.delivery_address.present?) %>
-            <p class="text-secondary mb-0">Sem detalhes adicionais.</p>
-          <% end %>
+          <div class="queue-details__content">
+            <% if order.customer.present? %>
+              <p class="text-secondary mb-1"><strong>Contato:</strong> <%= order.customer.email %></p>
+            <% end %>
+            <% if order.order_type_delivery? && order.delivery_address.present? %>
+              <p class="text-secondary mb-1"><strong>Endereço:</strong> <%= order.delivery_address %></p>
+              <p class="text-secondary mb-1"><strong>Distância:</strong> <%= order.delivery_distance_km ? "#{order.delivery_distance_km} km" : "-" %></p>
+            <% end %>
+            <% if item_notes.any? %>
+              <p class="text-secondary mb-1"><strong>Observações:</strong></p>
+              <ul class="notes-list">
+                <% item_notes.each do |note| %>
+                  <li><%= note %></li>
+                <% end %>
+              </ul>
+            <% elsif !order.customer.present? && !(order.order_type_delivery? && order.delivery_address.present?) %>
+              <p class="text-secondary mb-0">Sem detalhes adicionais.</p>
+            <% end %>
+          </div>
         </details>
 
         <% if action %>
@@ -98,6 +96,10 @@
               <%= ui_icon(action[:icon]) %>
               <span><%= action[:label] %></span>
             <% end %>
+          </div>
+        <% elsif order.received? %>
+          <div class="queue-order-card__footer">
+            <span class="prep-chip"><%= ui_icon(:clock) %> Aguardando vez na fila</span>
           </div>
         <% end %>
       </article>

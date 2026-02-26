@@ -3,7 +3,10 @@ class OrdersController < ApplicationController
   before_action :authenticate_customer!, only: :index
 
   def index
-    @orders = current_customer.orders.for_customer_channel.order(created_at: :desc).limit(30)
+    @orders = Order.for_customer_channel
+                   .where(customer_id: current_customer.id)
+                   .order(created_at: :desc)
+                   .limit(30)
   end
 
   def create
@@ -19,7 +22,8 @@ class OrdersController < ApplicationController
       order_type: order_type,
       table_number: effective_table_number,
       delivery_address: params[:delivery_address],
-      delivery_cep: params[:delivery_cep]
+      delivery_cep: params[:delivery_cep],
+      coupon_code: params[:coupon_code]
     ).call
     authorize order, :create?
 
@@ -64,7 +68,7 @@ class OrdersController < ApplicationController
   private
 
   def order_params
-    params.permit(:order_type, :table_number, :delivery_address, :delivery_cep, items: [:product_id, :combo_id, :quantity, :notes])
+    params.permit(:order_type, :table_number, :delivery_address, :delivery_cep, :coupon_code, items: [:product_id, :combo_id, :quantity, :notes])
   end
 
   def cart_items_payload
@@ -80,9 +84,9 @@ class OrdersController < ApplicationController
   def normalized_order_type
     return :table if table_session_active?
 
-    value = order_params[:order_type].presence || "table"
+    value = order_params[:order_type].presence || "pickup"
     value = value.to_s.downcase
-    return :table unless Order.order_types.key?(value)
+    return :pickup unless Order.order_types.key?(value)
 
     value.to_sym
   end
@@ -94,7 +98,13 @@ class OrdersController < ApplicationController
   end
 
   def ensure_checkout_access!(order_type)
-    return true if order_type == :table
+    if order_type == :table
+      return true if table_session_active?
+
+      redirect_to cart_path, alert: "Pedido de mesa só é permitido após escanear o QR Code da mesa."
+      return false
+    end
+
     return true if current_customer
 
     session[:return_to] = cart_path

@@ -109,6 +109,12 @@ GEM
     debug (1.11.1)
       irb (~> 1.10)
       reline (>= 0.3.8)
+    devise (5.0.2)
+      bcrypt (~> 3.0)
+      orm_adapter (~> 0.1)
+      railties (>= 7.0)
+      responders
+      warden (~> 1.2.3)
     diff-lcs (1.6.2)
     drb (2.2.3)
     erb (6.0.1)
@@ -159,6 +165,7 @@ GEM
     nio4r (2.7.5)
     nokogiri (1.19.1-x86_64-linux-gnu)
       racc (~> 1.4)
+    orm_adapter (0.5.0)
     popper_js (2.11.8)
     pp (0.6.3)
       prettyprint
@@ -224,6 +231,9 @@ GEM
     regexp_parser (2.11.3)
     reline (0.6.3)
       io-console (~> 0.5)
+    responders (3.2.0)
+      actionpack (>= 7.0)
+      railties (>= 7.0)
     rexml (3.4.4)
     rspec-core (3.13.6)
       rspec-support (~> 3.13.0)
@@ -284,6 +294,8 @@ GEM
       railties (>= 7.1.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
+    warden (1.2.9)
+      rack (>= 2.0.9)
     web-console (4.2.1)
       actionview (>= 6.0.0)
       activemodel (>= 6.0.0)
@@ -308,6 +320,7 @@ DEPENDENCIES
   capybara
   connection_pool (< 3.0)
   debug
+  devise (~> 5.0)
   importmap-rails
   mysql2 (>= 0.5.5)
   puma (>= 5.0)

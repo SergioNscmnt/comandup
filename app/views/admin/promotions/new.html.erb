@@ -1,0 +1,79 @@
+<%= turbo_frame_tag "admin_catalog_modal" do %>
+  <div class="admin-modal-backdrop" data-controller="frame-modal" data-action="click->frame-modal#closeIfBackdrop">
+    <section class="admin-modal-card">
+      <header class="admin-modal-head">
+        <h2 class="h5 mb-0"><%= ui_icon(:receipt) %> Novo Cupom</h2>
+        <button type="button" class="btn btn-sm btn-outline-brand" data-action="frame-modal#close">Fechar</button>
+      </header>
+
+      <% if flash.now[:alert].present? %>
+        <div class="alert alert-danger mt-3 mb-0"><%= flash.now[:alert] %></div>
+      <% end %>
+
+      <%= form_with model: @promotion, url: admin_promotions_path, method: :post, class: "admin-modal-form mt-3", data: { turbo_frame: "_top", controller: "discount-kind currency-mask" } do |f| %>
+        <div class="row g-2">
+          <div class="col-12">
+            <label class="form-label mb-1">Nome do cupom</label>
+            <%= f.text_field :name, class: "form-control", required: true, placeholder: "Ex: BEMVINDO10" %>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label mb-1">Tipo de desconto</label>
+            <div class="discount-kind-toggle">
+              <div class="form-check">
+                <%= f.radio_button :discount_kind, :percentage, class: "form-check-input", data: { action: "change->discount-kind#sync", discount_kind_target: "kind" } %>
+                <%= f.label :discount_kind, "Porcentagem", value: :percentage, class: "form-check-label" %>
+              </div>
+              <div class="form-check">
+                <%= f.radio_button :discount_kind, :fixed_value, class: "form-check-input", data: { action: "change->discount-kind#sync", discount_kind_target: "kind" } %>
+                <%= f.label :discount_kind, "Valor exato (R$)", value: :fixed_value, class: "form-check-label" %>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6" data-discount-kind-target="percentageGroup">
+            <label class="form-label mb-1">Desconto (%)</label>
+            <%= f.number_field :discount_percent, class: "form-control", min: 0, max: 100, step: "0.01", placeholder: "Ex: 15" %>
+          </div>
+
+          <div class="col-12 col-md-6" data-discount-kind-target="fixedValueGroup" hidden>
+            <label class="form-label mb-1">Desconto em valor (R$)</label>
+            <%= text_field_tag "promotion[discount_value_reais]", params.dig(:promotion, :discount_value_reais), class: "form-control", placeholder: "Ex: 10,00", inputmode: "numeric", data: { currency_mask_target: "field", action: "input->currency-mask#mask" } %>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label mb-1">Quantidade de cupons</label>
+            <%= f.number_field :quantity, class: "form-control", min: 0, step: 1, placeholder: "Ex: 100" %>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label mb-1">Status</label>
+            <%= f.select :active, [["Disponível", true], ["Indisponível", false]], {}, class: "form-select" %>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label mb-1">Data de criação</label>
+            <%= f.datetime_local_field :starts_at, class: "form-control" %>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label mb-1">Data de expiração</label>
+            <%= f.datetime_local_field :ends_at, class: "form-control" %>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label mb-1">Válido para categoria</label>
+            <%= f.select :coupon_category, [["Todos", "all"], ["Lanches", "lanches"], ["Combos", "combos"], ["Primeiro pedido", "primeiro_pedido"], ["Sucos", "sucos"], ["Sobremesas", "sobremesas"]], {}, class: "form-select" %>
+          </div>
+        </div>
+
+        <div class="admin-modal-actions mt-3">
+          <%= f.button class: "btn btn-brand icon-btn" do %>
+            <%= ui_icon(:check) %>
+            <span>Criar cupom</span>
+          <% end %>
+        </div>
+      <% end %>
+    </section>
+  </div>
+<% end %>

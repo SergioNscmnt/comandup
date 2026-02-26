@@ -15,8 +15,8 @@ class SessionsController < ApplicationController
     email = login_params[:email].to_s.downcase.strip
     user = User.customer.find_by(email: email)
 
-    if user&.authenticate(login_params[:password].to_s)
-      session[:customer_user_id] = user.id
+    if user&.valid_password?(login_params[:password].to_s)
+      sign_in(user)
       redirect_to(session.delete(:return_to) || cart_path, notice: "Login realizado com sucesso.")
     else
       @login_email = email
@@ -31,7 +31,7 @@ class SessionsController < ApplicationController
     user.email = user.email.to_s.downcase.strip
 
     if user.save
-      session[:customer_user_id] = user.id
+      sign_in(user)
       redirect_to(session.delete(:return_to) || cart_path, notice: "Conta criada com sucesso.")
     else
       @signup_name = user.name
@@ -109,14 +109,14 @@ class SessionsController < ApplicationController
     user.email = email
     user.name = name.presence || email.split("@").first.titleize
 
-    if user.password_digest.blank?
+    if user.encrypted_password.blank?
       temporary_password = SecureRandom.hex(24)
       user.password = temporary_password
       user.password_confirmation = temporary_password
     end
 
     user.save!
-    session[:customer_user_id] = user.id
+    sign_in(user)
     redirect_to(session.delete(:return_to) || cart_path, notice: "Login com Google realizado com sucesso.")
   rescue ActiveRecord::RecordInvalid => e
     redirect_to customer_login_path, alert: e.record.errors.full_messages.to_sentence
@@ -125,7 +125,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    session.delete(:customer_user_id)
+    sign_out(:user)
     redirect_to products_path, notice: "Sessão encerrada."
   end
 

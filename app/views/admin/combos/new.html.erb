@@ -1,0 +1,42 @@
+<%= turbo_frame_tag "admin_catalog_modal" do %>
+  <div class="admin-modal-backdrop" data-controller="frame-modal" data-action="click->frame-modal#closeIfBackdrop">
+    <section class="admin-modal-card">
+      <header class="admin-modal-head">
+        <h2 class="h5 mb-0"><%= ui_icon(:receipt) %> Novo Combo</h2>
+        <button type="button" class="btn btn-sm btn-outline-brand" data-action="frame-modal#close">Fechar</button>
+      </header>
+
+      <% if flash.now[:alert].present? %>
+        <div class="alert alert-danger mt-3 mb-0"><%= flash.now[:alert] %></div>
+      <% end %>
+
+      <%= form_with model: @combo, url: admin_combos_path, method: :post, class: "admin-modal-form mt-3", data: { turbo_frame: "_top", controller: "currency-mask" } do |f| %>
+        <div class="row g-2">
+          <div class="col-12">
+            <label class="form-label mb-1">Nome</label>
+            <%= f.text_field :name, class: "form-control", required: true %>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label mb-1">Valor (R$)</label>
+            <%= f.text_field :price_reais, class: "form-control", placeholder: "Ex: 29,90", required: true, inputmode: "numeric", data: { currency_mask_target: "field", action: "input->currency-mask#mask" } %>
+          </div>
+          <div class="col-12 col-md-8">
+            <label class="form-label mb-1">Status</label>
+            <%= f.select :active, [["Disponível", true], ["Indisponível", false]], {}, class: "form-select" %>
+          </div>
+          <div class="col-12">
+            <label class="form-label mb-1">Descrição</label>
+            <%= f.text_area :description, class: "form-control", rows: 3 %>
+          </div>
+        </div>
+
+        <div class="admin-modal-actions mt-3">
+          <%= f.button class: "btn btn-brand icon-btn" do %>
+            <%= ui_icon(:check) %>
+            <span>Criar combo</span>
+          <% end %>
+        </div>
+      <% end %>
+    </section>
+  </div>
+<% end %>

@@ -1,9 +1,31 @@
-<% message = local_assigns[:message] %>
+<%
+  toasts = []
+  flash.each do |kind, text|
+    next if text.blank?
+    next unless text.is_a?(String)
+
+    normalized_kind = kind.to_s == "alert" ? "alert" : "notice"
+    toasts << { kind: normalized_kind, text: text }
+  end
+
+  message = local_assigns[:message]
+  if message.present?
+    custom_kind = local_assigns[:kind].to_s == "alert" ? "alert" : "notice"
+    toasts << { kind: custom_kind, text: message }
+  end
+%>
+
 <div id="toast-area" class="toast-area" aria-live="polite" aria-atomic="true">
-  <% if message.present? %>
-    <div class="toast-notice" data-controller="toast" data-toast-timeout-value="2200" role="status">
-      <%= ui_icon(:check) %>
-      <span><%= message %></span>
+  <% toasts.each do |toast| %>
+    <div class="toast-notice toast-notice--<%= toast[:kind] %>" data-controller="toast" data-toast-timeout-value="4200" role="status">
+      <div class="toast-notice__icon">
+        <%= toast[:kind] == "alert" ? ui_icon(:x) : ui_icon(:check) %>
+      </div>
+      <div class="toast-notice__content"><%= toast[:text] %></div>
+      <button type="button" class="toast-notice__close" data-action="toast#close" aria-label="Fechar notificação">
+        <%= ui_icon(:x) %>
+      </button>
+      <div class="toast-notice__timer" data-toast-target="timer"></div>
     </div>
   <% end %>
 </div>

@@ -43,4 +43,25 @@ RSpec.describe "Customer authentication", type: :request do
       expect(response.body).to include("Email ou senha inválidos.")
     end
   end
+
+  describe "POST /recuperar-senha" do
+    let!(:customer) do
+      User.customer.create!(
+        name: "Ana Cliente",
+        email: "ana@example.com",
+        password: "segredo123",
+        password_confirmation: "segredo123"
+      )
+    end
+
+    it "sends reset password instructions and redirects to login" do
+      expect do
+        post user_password_path, params: { user: { email: customer.email } }
+      end.to change(ActionMailer::Base.deliveries, :count).by(1)
+
+      expect(response).to redirect_to(customer_login_path)
+      follow_redirect!
+      expect(response.body).to include("você receberá instruções para redefinir a senha")
+    end
+  end
 end

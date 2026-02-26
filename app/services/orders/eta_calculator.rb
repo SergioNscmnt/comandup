@@ -4,7 +4,7 @@ module Orders
       open_orders = Order.open_queue.to_a
       count = open_orders.length
 
-      tmp = (settings.minutos_base_producao.to_f / [count, 1].max)
+      tmp = (base_prep_minutes.to_f / [count, 1].max)
       tmp = [[tmp, settings.tmp_min].max, settings.tmp_max].min
 
       Order.transaction do
@@ -19,6 +19,13 @@ module Orders
 
     def self.settings
       Rails.configuration.x.order_settings
+    end
+
+    def self.base_prep_minutes
+      company_value = User.company_account&.company_prep_minutes_base.to_i
+      return company_value if company_value.positive?
+
+      settings.minutos_base_producao.to_i
     end
   end
 end

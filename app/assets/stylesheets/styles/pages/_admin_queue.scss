@@ -393,3 +393,17 @@
   margin-bottom: 0.35rem;
 }
 
+.queue-details__content {
+  max-height: 170px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.queue-details__content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.queue-details__content::-webkit-scrollbar-thumb {
+  background: #c8dbe6;
+  border-radius: 999px;
+}

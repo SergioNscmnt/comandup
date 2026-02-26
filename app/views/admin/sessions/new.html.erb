@@ -18,11 +18,17 @@
             <%= f.email_field :email, class: "form-control", required: true, autofocus: true %>
           </div>
 
-          <div class="mb-4">
+          <div class="mb-4" data-controller="password-visibility">
             <%= f.label :password, class: "form-label" do %>
               <%= ui_icon(:check) %> Senha
             <% end %>
-            <%= f.password_field :password, class: "form-control", required: true %>
+            <div class="input-group">
+              <%= f.password_field :password, class: "form-control", required: true, data: { password_visibility_target: "input" } %>
+              <button type="button" class="btn btn-outline-brand icon-btn justify-content-center" data-password-visibility-target="button" data-action="password-visibility#toggle" aria-label="Mostrar senha" title="Mostrar senha">
+                <span data-password-visibility-target="showIcon"><%= ui_icon(:eye) %></span>
+                <span data-password-visibility-target="hideIcon" hidden><%= ui_icon(:eye_slash) %></span>
+              </button>
+            </div>
           </div>
 
           <div class="d-grid">

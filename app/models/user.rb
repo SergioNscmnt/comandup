@@ -1,5 +1,6 @@
 class User < ApplicationRecord
-  has_secure_password validations: false
+  devise :database_authenticatable,
+         :recoverable, :rememberable, :validatable
 
   enum role: { customer: 0, admin: 1 }
 
@@ -11,9 +12,11 @@ class User < ApplicationRecord
   validates :provider, inclusion: { in: ["google_oauth2"] }, allow_nil: true
   validates :uid, presence: true, if: -> { provider.present? }
   validates :uid, uniqueness: { scope: :provider }, allow_nil: true
-  validates :password_digest, presence: true, unless: :oauth_account?
-  validates :password, presence: true, if: :password_required?
-  validates :password, length: { minimum: 8 }, if: :password_present_for_local_account?
+  validates :company_delivery_radius_km, numericality: { greater_than: 0 }, allow_nil: true
+  validates :company_delivery_fee_per_km_cents, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :company_delivery_min_fee_cents, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :company_delivery_min_order_cents, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :company_prep_minutes_base, numericality: { greater_than: 0 }, allow_nil: true
 
   before_validation :normalize_email
 
@@ -35,15 +38,5 @@ class User < ApplicationRecord
 
   def normalize_email
     self.email = email.to_s.downcase.strip
-  end
-
-  def password_required?
-    return false if oauth_account?
-
-    new_record? || password.present?
-  end
-
-  def password_present_for_local_account?
-    !oauth_account? && password.present?
   end
 end

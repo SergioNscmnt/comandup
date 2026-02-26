@@ -6,6 +6,6 @@ class BroadcastQueueUpdateJob < ApplicationJob
       { id: id, status: status, queue_position: queue_position, eta_minutes: eta_minutes }
     end
 
-    ActionCable.server.broadcast("orders_queue", payload: payload)
+    ActionCable.server.broadcast("orders_queue", { payload: payload })
   end
 end

@@ -71,7 +71,13 @@
         </div>
       </div>
 
-      <% default_order_type = table_session_active? ? "table" : (current_customer ? "pickup" : "table") %>
+      <div class="mt-3 mb-1">
+        <label class="form-label mb-1" for="coupon_code">Cupom (opcional)</label>
+        <%= text_field_tag :coupon_code, params[:coupon_code], id: "coupon_code", class: "form-control", placeholder: "Ex: BEMVINDO10" %>
+        <small class="text-secondary">Cupons de primeiro pedido só funcionam para clientes sem pedidos anteriores.</small>
+      </div>
+
+      <% default_order_type = table_session_active? ? "table" : "pickup" %>
 
       <hr>
       <% if table_session_active? %>
@@ -82,12 +88,6 @@
       <% else %>
         <p class="mb-2"><strong>Como você quer receber?</strong></p>
         <div class="d-flex flex-wrap gap-3 mb-3">
-          <% unless current_customer %>
-            <label class="d-flex align-items-center gap-2">
-              <%= radio_button_tag :order_type, "table", default_order_type == "table", data: { action: "change->delivery-fields#toggle" } %>
-              <span>Mesa</span>
-            </label>
-          <% end %>
           <label class="d-flex align-items-center gap-2">
             <%= radio_button_tag :order_type, "pickup", default_order_type == "pickup", data: { action: "change->delivery-fields#toggle" } %>
             <span>Retirada</span>
@@ -97,13 +97,6 @@
             <span>Delivery</span>
           </label>
         </div>
-
-        <% unless current_customer %>
-          <div class="mb-3">
-            <label class="form-label mb-1">Mesa (obrigatório para pedido de mesa)</label>
-            <%= text_field_tag :table_number, "", class: "form-control", placeholder: "Ex: Mesa 7" %>
-          </div>
-        <% end %>
       <% end %>
 
       <div class="mb-3" data-controller="viacep" data-delivery-fields-target="addressSection" data-viacep-subtotal-cents-value="<%= @subtotal_cents %>" hidden>
@@ -124,7 +117,7 @@
 
         <div class="mb-2">
           <label class="form-label mb-1">Rua</label>
-          <%= text_field_tag :delivery_street, "", class: "form-control", placeholder: "Ex: Rua das Flores", data: { viacep_target: "street", action: "input->viacep#compose", delivery_fields_target: "field", required_when_delivery: true } %>
+          <%= text_field_tag :delivery_street, "", class: "form-control", placeholder: "Ex: Rua das Flores", autocomplete: "address-line1", data: { controller: "osm-autocomplete", osm_autocomplete_field_value: "street", viacep_target: "street", action: "input->viacep#compose input->osm-autocomplete#search", delivery_fields_target: "field", required_when_delivery: true } %>
         </div>
 
         <div class="row g-2 mb-2">
@@ -134,7 +127,7 @@
           </div>
           <div class="col-6">
             <label class="form-label mb-1">Bairro</label>
-            <%= text_field_tag :delivery_neighborhood, "", class: "form-control", placeholder: "Ex: Centro", data: { viacep_target: "neighborhood", action: "input->viacep#compose", delivery_fields_target: "field", required_when_delivery: true } %>
+            <%= text_field_tag :delivery_neighborhood, "", class: "form-control", placeholder: "Ex: Centro", autocomplete: "address-level3", data: { controller: "osm-autocomplete", osm_autocomplete_field_value: "neighborhood", viacep_target: "neighborhood", action: "input->viacep#compose input->osm-autocomplete#search", delivery_fields_target: "field", required_when_delivery: true } %>
           </div>
         </div>
 

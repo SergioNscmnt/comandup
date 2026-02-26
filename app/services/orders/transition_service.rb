@@ -17,9 +17,12 @@ module Orders
     end
 
     def start_production
-      top_order_id = Order.open_queue.first&.id
-      bypass = top_order_id.present? && top_order_id != @order.id
-      transition!(to: :in_production, from: [:received], event: "start_production", bypass: bypass)
+      next_order = Order.open_queue.first
+      if next_order.present? && next_order.id != @order.id
+        raise InvalidTransition, "Respeite a fila FIFO: inicie primeiro o pedido ##{next_order.id}."
+      end
+
+      transition!(to: :in_production, from: [:received], event: "start_production")
     end
 
     def finish
@@ -32,7 +35,7 @@ module Orders
 
     private
 
-    def transition!(to:, from:, event:, bypass: false)
+    def transition!(to:, from:, event:)
       @order.with_lock do
         raise InvalidTransition, "invalid transition" unless from.map(&:to_s).include?(@order.status)
 
@@ -49,7 +52,7 @@ module Orders
           from_status: Order.statuses[from_status],
           to_status: Order.statuses[to.to_s],
           reason: @reason,
-          metadata: metadata_payload(bypass)
+          metadata: metadata_payload
         )
       end
 
@@ -69,8 +72,8 @@ module Orders
       }[status.to_sym]
     end
 
-    def metadata_payload(bypass)
-      JSON.generate(bypass ? { queue_bypass: true } : {})
+    def metadata_payload
+      "{}"
     end
   end
 end

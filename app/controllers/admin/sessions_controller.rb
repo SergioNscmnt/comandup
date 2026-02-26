@@ -9,8 +9,8 @@ module Admin
     def create
       user = User.admin.find_by(email: params[:email].to_s.downcase.strip)
 
-      if user&.authenticate(params[:password])
-        session[:admin_user_id] = user.id
+      if user&.valid_password?(params[:password].to_s)
+        sign_in(user)
         redirect_to admin_queue_path
       else
         flash.now[:alert] = "Email ou senha inválidos"
@@ -19,7 +19,7 @@ module Admin
     end
 
     def destroy
-      reset_session
+      sign_out(:user)
       redirect_to admin_login_path
     end
   end

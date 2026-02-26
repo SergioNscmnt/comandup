@@ -3,13 +3,44 @@
     <div>
       <p class="eyebrow mb-1">Cardápio</p>
       <h1 class="h2 mb-2"><%= ui_icon(:box) %> Produtos disponíveis</h1>
-      <p class="text-secondary mb-0">Escolha rápida com visual claro de preço.</p>
+      <p class="text-secondary mb-0">Escolha seu pedido.</p>
     </div>
 
-    <%= render "cart_summary_chip" %>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <% if current_admin %>
+        <div class="admin-add-menu" data-controller="admin-add-menu" data-action="click@window->admin-add-menu#hideOnOutsideClick">
+          <button type="button" class="btn btn-outline-brand icon-btn" data-action="admin-add-menu#toggle">
+            <%= ui_icon(:plus) %>
+            <span>Adicionar</span>
+          </button>
+          <div class="admin-add-menu__dropdown" data-admin-add-menu-target="menu" hidden>
+            <%= link_to new_admin_product_path, data: { turbo_frame: "admin_catalog_modal" } do %>
+              <%= ui_icon(:box) %>
+              <span>Novo Produto</span>
+            <% end %>
+            <%= link_to new_admin_combo_path, data: { turbo_frame: "admin_catalog_modal" } do %>
+              <%= image_tag "/food-icon.svg", alt: "", class: "admin-add-menu__icon", aria: { hidden: true } %>
+              <span>Novo Combo</span>
+            <% end %>
+            <%= link_to new_admin_promotion_path, data: { turbo_frame: "admin_catalog_modal" } do %>
+              <%= ui_icon(:receipt) %>
+              <span>Novo Cupom</span>
+            <% end %>
+            <%= link_to new_admin_category_path, data: { turbo_frame: "admin_catalog_modal" } do %>
+              <%= ui_icon(:list) %>
+              <span>Nova Categoria</span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <%= render "cart_summary_chip" %>
+    </div>
   </div>
 
   <%= render "category_nav" %>
 
   <%= render "grid" %>
+
+  <%= turbo_frame_tag "admin_catalog_modal" %>
 </div>

@@ -8,6 +8,8 @@
   --line: #d8e4ea;
   --text-main: #0f1f2b;
   --text-muted: #5c7485;
+  --app-shell-max-width: 1360px;
+  --app-shell-min-height: calc(100vh - 68px - 3.5rem);
 }
 
 * {
@@ -233,4 +235,12 @@ body {
 
 .app-main {
   padding: 1rem 0 2.5rem;
+}
+
+.app-main > .container,
+.app-main > .container-fluid {
+  max-width: var(--app-shell-max-width);
+  min-height: var(--app-shell-min-height);
+  margin-left: auto;
+  margin-right: auto;
 }

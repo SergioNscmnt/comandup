@@ -1,0 +1,152 @@
+<div class="container-fluid admin-dashboard-container py-4 py-lg-5">
+  <%= render "top", filter_path: simulator_admin_dashboard_path %>
+
+  <div class="dashboard-screen-content mt-3">
+  <section class="dashboard-panel fade-in-up">
+    <h2 class="h5 mb-2"><%= ui_icon(:receipt) %> Simulador de cenários</h2>
+    <% sim = @metrics[:simulation] %>
+    <%= form_with url: simulator_admin_dashboard_path, method: :get, local: true, class: "simulator-form mb-3" do %>
+      <%= hidden_field_tag :period, @metrics[:period] %>
+      <%= hidden_field_tag :order_type, @metrics[:selected_order_type] %>
+      <div class="simulator-form__grid">
+        <div>
+          <label for="product_id" class="form-label mb-1">Produto</label>
+          <%= select_tag :product_id, options_for_select([["Todos", ""]] + sim[:products].map { |row| [row[:product_name], row[:product_id]] }, @metrics[:selected_product_id]), class: "form-select form-select-sm" %>
+        </div>
+        <div>
+          <label for="discount_percent" class="form-label mb-1">Desconto (%)</label>
+          <%= number_field_tag :discount_percent, sim.dig(:input, :discount_percent), class: "form-control form-control-sm", min: 0, step: 0.1 %>
+        </div>
+        <div>
+          <label for="combo_factor" class="form-label mb-1">Combo fator</label>
+          <%= number_field_tag :combo_factor, sim.dig(:input, :combo_factor), class: "form-control form-control-sm", min: 0, step: 0.01 %>
+        </div>
+        <div>
+          <label for="price_increase_percent" class="form-label mb-1">Reajuste (%)</label>
+          <%= number_field_tag :price_increase_percent, sim.dig(:input, :price_increase_percent), class: "form-control form-control-sm", step: 0.1 %>
+        </div>
+        <div>
+          <label for="elasticity" class="form-label mb-1">Elasticidade</label>
+          <%= number_field_tag :elasticity, sim.dig(:input, :elasticity), class: "form-control form-control-sm", step: 0.1 %>
+        </div>
+        <div>
+          <label for="margin_min_percent" class="form-label mb-1">Margem mínima (%)</label>
+          <%= number_field_tag :margin_min_percent, sim.dig(:input, :margin_min_percent), class: "form-control form-control-sm", min: 0, step: 0.1 %>
+        </div>
+      </div>
+      <div class="simulator-form__actions">
+        <div class="form-check">
+          <%= check_box_tag :free_shipping_absorbed, "1", sim.dig(:input, :free_shipping_absorbed), class: "form-check-input" %>
+          <label for="free_shipping_absorbed" class="form-check-label text-secondary">Frete grátis absorvido</label>
+        </div>
+        <%= button_tag "Aplicar cenário", type: :submit, class: "btn btn-sm btn-brand" %>
+      </div>
+    <% end %>
+
+    <div class="sim-summary-grid mb-3">
+      <article class="sim-card">
+        <small>Volume baseline</small>
+        <strong><%= number_with_precision(sim.dig(:current, :baseline_qty), precision: 2) %></strong>
+      </article>
+      <article class="sim-card">
+        <small>Volume cenário</small>
+        <strong><%= number_with_precision(sim.dig(:current, :scenario_qty), precision: 2) %></strong>
+      </article>
+      <article class="sim-card">
+        <small>Lucro baseline</small>
+        <strong><%= money(sim.dig(:current, :baseline_profit_cents)) %></strong>
+      </article>
+      <article class="sim-card">
+        <small>Lucro cenário</small>
+        <strong><%= money(sim.dig(:current, :scenario_profit_cents)) %></strong>
+      </article>
+      <article class="sim-card">
+        <small>Margem cenário</small>
+        <strong><%= number_to_percentage(sim.dig(:current, :scenario_margin_percent), precision: 2) %></strong>
+      </article>
+      <article class="sim-card">
+        <small>Variação de lucro</small>
+        <strong><%= number_to_percentage(sim.dig(:current, :profit_change_percent), precision: 2) %></strong>
+      </article>
+    </div>
+
+    <% if sim.dig(:recommendation, :selected).present? %>
+      <div class="recommendation-card mb-3">
+        <p class="mb-1"><strong>Melhor oferta sugerida:</strong> <%= sim.dig(:recommendation, :selected, :offer_name) %></p>
+        <p class="mb-0 text-secondary">
+          Lucro: <%= money(sim.dig(:recommendation, :selected, :scenario_profit_cents)) %> |
+          Margem: <%= number_to_percentage(sim.dig(:recommendation, :selected, :scenario_margin_percent), precision: 2) %> |
+          Volume: <%= number_to_percentage(sim.dig(:recommendation, :selected, :volume_change_percent), precision: 2) %>
+        </p>
+      </div>
+    <% else %>
+      <p class="text-secondary mb-3">Nenhuma oferta cumpre simultaneamente margem mínima e preservação de volume.</p>
+    <% end %>
+
+    <div class="dashboard-grid">
+      <article class="dashboard-panel">
+        <h3 class="h6 mb-2">Produto herói</h3>
+        <% if sim[:hero_product] %>
+          <p class="mb-1"><strong><%= sim[:hero_product][:product_name] %></strong></p>
+          <p class="mb-0 text-secondary">Lucro total: <%= money(sim[:hero_product][:baseline_profit_cents]) %></p>
+        <% else %>
+          <p class="mb-0 text-secondary">Sem produto elegível no período.</p>
+        <% end %>
+      </article>
+      <article class="dashboard-panel">
+        <h3 class="h6 mb-2">Produtos problema</h3>
+        <% if sim[:problem_products].any? %>
+          <ul class="problem-list mb-0">
+            <% sim[:problem_products].each do |row| %>
+              <li>
+                <span><%= row[:product_name] %></span>
+                <strong><%= number_to_percentage(row[:baseline_margin_percent], precision: 2) %></strong>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="mb-0 text-secondary">Nenhum produto com margem crítica.</p>
+        <% end %>
+      </article>
+    </div>
+
+    <div class="table-responsive mt-3">
+      <table class="table table-sm align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Qtd base</th>
+            <th>Qtd cenário</th>
+            <th>Lucro base</th>
+            <th>Lucro cenário</th>
+            <th>Margem cenário</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% sim[:products].first(20).each do |row| %>
+            <tr>
+              <td><%= row[:product_name] %></td>
+              <td><%= number_with_precision(row[:baseline_qty], precision: 2) %></td>
+              <td><%= number_with_precision(row[:scenario_qty], precision: 2) %></td>
+              <td><%= money(row[:baseline_profit_cents]) %></td>
+              <td><%= money(row[:scenario_profit_cents]) %></td>
+              <td><%= number_to_percentage(row[:scenario_margin_percent], precision: 2) %></td>
+              <td>
+                <% case row[:margin_status] %>
+                <% when "negative" %>
+                  <span class="status-pill status-canceled">Negativa</span>
+                <% when "below_target" %>
+                  <span class="status-pill status-received">Abaixo da meta</span>
+                <% else %>
+                  <span class="status-pill status-delivered">Saudável</span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  </div>
+</div>

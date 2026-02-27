@@ -47,6 +47,10 @@
           <% end %>
 
           <% if current_admin %>
+            <%= link_to admin_dashboard_path, class: "icon-link" do %>
+              <%= ui_icon(:chart) %>
+              <span>Dashboard</span>
+            <% end %>
             <%= link_to admin_queue_path, class: "icon-link" do %>
               <%= ui_icon(:list) %>
               <span>Fila de Pedidos</span>

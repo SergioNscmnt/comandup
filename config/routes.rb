@@ -43,6 +43,11 @@ Rails.application.routes.draw do
     post "login", to: "sessions#create"
     delete "logout", to: "sessions#destroy"
 
+    resource :dashboard, only: :show, controller: "dashboards" do
+      get :finance
+      get :simulator
+      get :alerts
+    end
     resource :queue, only: :show, controller: "queue"
     resource :company_profile, only: [:edit, :update], controller: "company_profiles"
     resources :products, only: [:new, :create, :edit, :update, :destroy]

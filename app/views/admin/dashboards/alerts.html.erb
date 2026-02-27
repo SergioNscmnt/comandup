@@ -1,0 +1,44 @@
+<div class="container-fluid admin-dashboard-container py-4 py-lg-5">
+  <%= render "top", filter_path: alerts_admin_dashboard_path %>
+
+  <div class="dashboard-screen-content mt-3">
+  <section class="dashboard-panel fade-in-up">
+    <h2 class="h5 mb-2"><%= ui_icon(:clock) %> Alertas e anomalias</h2>
+    <% if @metrics[:alerts].any? %>
+      <ul class="alerts-list mb-0">
+        <% @metrics[:alerts].each do |alert| %>
+          <li class="alert-row alert-row--<%= alert[:severity] %>">
+            <div>
+              <strong><%= alert[:title] %></strong>
+              <p class="mb-0 text-secondary"><%= alert[:recommendation] %></p>
+            </div>
+            <span class="alert-metric"><%= alert[:metric] %></span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-secondary mb-0">Nenhum alerta no período selecionado.</p>
+    <% end %>
+  </section>
+
+  <section class="dashboard-grid mt-3">
+    <article class="dashboard-panel fade-in-up">
+      <h3 class="h6 mb-2">Resumo de risco</h3>
+      <ul class="finance-list mb-0">
+        <li><span>Cancelamento</span><strong><%= number_to_percentage(@metrics.dig(:totals, :cancel_rate), precision: 2) %></strong></li>
+        <li><span>Margem operacional</span><strong><%= number_to_percentage(@metrics.dig(:totals, :operating_margin_percent), precision: 2) %></strong></li>
+        <li><span>Descontos</span><strong><%= money(@metrics.dig(:financials, :discounts_cents)) %></strong></li>
+      </ul>
+    </article>
+    <article class="dashboard-panel fade-in-up">
+      <h3 class="h6 mb-2">Ação recomendada</h3>
+      <p class="text-secondary mb-2">Priorize alertas críticos em sequência:</p>
+      <ol class="mb-0">
+        <li>Margem negativa: revisar preços e custo unitário.</li>
+        <li>Cancelamento alto: revisar SLA de produção e capacidade.</li>
+        <li>Desconto elevado: calibrar campanhas por horário/modalidade.</li>
+      </ol>
+    </article>
+  </section>
+  </div>
+</div>

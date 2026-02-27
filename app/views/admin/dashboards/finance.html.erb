@@ -1,0 +1,73 @@
+<div class="container-fluid admin-dashboard-container py-4 py-lg-5">
+  <%= render "top", filter_path: finance_admin_dashboard_path %>
+
+  <div class="dashboard-screen-content mt-3">
+  <section class="dashboard-grid">
+    <article class="dashboard-panel fade-in-up">
+      <h2 class="h5 mb-2"><%= ui_icon(:receipt) %> Waterfall financeiro</h2>
+      <% net_revenue = @metrics.dig(:financials, :net_revenue_cents).to_i %>
+      <% waterfall_steps = [
+        { label: "Receita líquida", value: net_revenue, kind: :positive },
+        { label: "CPV", value: @metrics.dig(:financials, :cpv_cents).to_i, kind: :negative },
+        { label: "Custos variáveis", value: @metrics.dig(:financials, :variable_costs_cents).to_i, kind: :negative },
+        { label: "Custos fixos", value: @metrics.dig(:financials, :fixed_allocated_cents).to_i, kind: :negative },
+        { label: "Lucro operacional", value: @metrics.dig(:financials, :operating_profit_cents).to_i, kind: :result }
+      ] %>
+      <% max_abs = waterfall_steps.map { |s| s[:value].abs }.max.to_i %>
+      <div class="waterfall-chart mb-3">
+        <% waterfall_steps.each do |step| %>
+          <% width = max_abs.positive? ? ((step[:value].abs.to_f / max_abs) * 100).round(2) : 0 %>
+          <% value_prefix = step[:kind] == :negative || (step[:kind] == :result && step[:value].negative?) ? "- " : "" %>
+          <div class="waterfall-chart__row">
+            <span class="waterfall-chart__label"><%= step[:label] %></span>
+            <div class="waterfall-chart__bar-wrap">
+              <span class="waterfall-chart__bar waterfall-chart__bar--<%= step[:kind] %>" style="width: <%= width %>%"></span>
+            </div>
+            <span class="waterfall-chart__value <%= "text-danger" if step[:kind] == :negative || (step[:kind] == :result && step[:value].negative?) %>"><%= value_prefix %><%= money(step[:value].abs) %></span>
+          </div>
+        <% end %>
+      </div>
+      <ul class="finance-list mb-0">
+        <li><span>Receita bruta</span><strong><%= money(@metrics.dig(:financials, :gross_revenue_cents)) %></strong></li>
+        <li><span>Descontos</span><strong>- <%= money(@metrics.dig(:financials, :discounts_cents)) %></strong></li>
+        <li><span>Receita líquida</span><strong><%= money(@metrics.dig(:financials, :net_revenue_cents)) %></strong></li>
+        <li><span>CPV</span><strong>- <%= money(@metrics.dig(:financials, :cpv_cents)) %></strong></li>
+        <li><span>Custos variáveis</span><strong>- <%= money(@metrics.dig(:financials, :variable_costs_cents)) %></strong></li>
+        <li class="finance-highlight"><span>Lucro bruto</span><strong><%= money(@metrics.dig(:financials, :gross_profit_cents)) %></strong></li>
+        <li><span>Custos fixos rateados</span><strong>- <%= money(@metrics.dig(:financials, :fixed_allocated_cents)) %></strong></li>
+        <li class="finance-highlight"><span>Lucro operacional</span><strong><%= money(@metrics.dig(:financials, :operating_profit_cents)) %></strong></li>
+      </ul>
+    </article>
+
+    <article class="dashboard-panel fade-in-up">
+      <h2 class="h5 mb-2"><%= ui_icon(:list) %> DRE resumido</h2>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <tbody>
+            <tr>
+              <th>Margem bruta</th>
+              <td><%= number_to_percentage(@metrics.dig(:financials, :gross_margin_percent), precision: 2) %></td>
+            </tr>
+            <tr>
+              <th>Margem operacional</th>
+              <td><%= number_to_percentage(@metrics.dig(:financials, :operating_margin_percent), precision: 2) %></td>
+            </tr>
+            <tr>
+              <th>Ponto de atenção</th>
+              <td>
+                <% if @metrics.dig(:financials, :operating_margin_percent).to_f < 0 %>
+                  <span class="status-pill status-canceled">Margem negativa</span>
+                <% elsif @metrics.dig(:financials, :operating_margin_percent).to_f < 25 %>
+                  <span class="status-pill status-received">Abaixo da meta de 25%</span>
+                <% else %>
+                  <span class="status-pill status-delivered">Dentro da meta</span>
+                <% end %>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+  </div>
+</div>

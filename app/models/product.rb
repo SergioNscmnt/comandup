@@ -3,6 +3,7 @@ class Product < ApplicationRecord
 
   belongs_to :category
 
+  has_one :product_cost, dependent: :destroy
   has_many :combo_items, dependent: :restrict_with_exception
   has_many :order_items, dependent: :restrict_with_exception
 

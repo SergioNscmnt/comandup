@@ -1,0 +1,24 @@
+<section class="section-head fade-in-up d-flex flex-wrap justify-content-between gap-3 align-items-end">
+  <div>
+    <p class="eyebrow mb-1">Gestão</p>
+    <h1 class="h2 mb-1"><%= ui_icon(:chart) %> Dashboard administrativo</h1>
+    <p class="text-secondary mb-0">
+      Período: <strong><%= l(@metrics[:from], format: :short) %></strong> até <strong><%= l(@metrics[:to], format: :short) %></strong>
+    </p>
+  </div>
+
+  <%= form_with url: filter_path, method: :get, local: true, class: "dashboard-filters d-flex align-items-center gap-2 flex-wrap", data: { controller: "autosubmit" } do %>
+    <label for="period" class="mb-0 text-secondary">Período:</label>
+    <%= select_tag :period, options_for_select([["Dia", "day"], ["Semana", "week"], ["Mês", "month"], ["6 meses", "six_months"], ["Ano", "year"]], @metrics[:period]), class: "form-select form-select-sm", data: { action: "change->autosubmit#submit" } %>
+
+    <label for="order_type" class="mb-0 text-secondary">Tipo:</label>
+    <%= select_tag :order_type, options_for_select([["Todos", ""], ["Mesa", "table"], ["Retirada", "pickup"], ["Delivery", "delivery"]], @metrics[:selected_order_type]), class: "form-select form-select-sm", data: { action: "change->autosubmit#submit" } %>
+  <% end %>
+</section>
+
+<nav class="dashboard-screen-nav mt-3">
+  <%= link_to "Visão Geral", admin_dashboard_path(@screen_query), class: "screen-tab #{'is-active' if @active_screen == :overview}" %>
+  <%= link_to "Financeiro", finance_admin_dashboard_path(@screen_query), class: "screen-tab #{'is-active' if @active_screen == :finance}" %>
+  <%= link_to "Simulador", simulator_admin_dashboard_path(@screen_query), class: "screen-tab #{'is-active' if @active_screen == :simulator}" %>
+  <%= link_to "Alertas", alerts_admin_dashboard_path(@screen_query), class: "screen-tab #{'is-active' if @active_screen == :alerts}" %>
+</nav>

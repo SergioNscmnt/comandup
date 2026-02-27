@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_26_052000) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_27_003000) do
   create_table "audit_logs", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.bigint "order_id", null: false
     t.bigint "user_id"
@@ -134,6 +134,19 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_26_052000) do
     t.check_constraint "json_valid(`raw_payload`)", name: "raw_payload"
   end
 
+  create_table "product_costs", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
+    t.bigint "product_id", null: false
+    t.integer "ingredients_cents", default: 0, null: false
+    t.integer "packaging_cents", default: 0, null: false
+    t.decimal "losses_percent", precision: 5, scale: 2, default: "0.0", null: false
+    t.integer "labor_cents", default: 0, null: false
+    t.integer "fixed_allocation_cents", default: 0, null: false
+    t.decimal "channel_fee_percent", precision: 5, scale: 2, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_product_costs_on_product_id", unique: true
+  end
+
   create_table "products", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -202,5 +215,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_26_052000) do
   add_foreign_key "order_items", "products"
   add_foreign_key "orders", "users", column: "customer_id"
   add_foreign_key "payments", "orders"
+  add_foreign_key "product_costs", "products"
   add_foreign_key "products", "categories"
 end

@@ -24,6 +24,37 @@
       <label class="form-label mb-1">Status</label>
       <%= f.select :active, [["Disponível", true], ["Indisponível", false]], {}, class: "form-select" %>
     </div>
+
+    <div class="col-12">
+      <hr class="my-2">
+      <h3 class="h6 mb-1"><%= ui_icon(:receipt) %> Custos de produção</h3>
+      <p class="text-secondary small mb-0">Esses custos alimentam o financeiro e o simulador de margem.</p>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <label class="form-label mb-1">Ingredientes (R$)</label>
+      <%= text_field_tag "product_cost[ingredients_reais]", cost_fields[:ingredients_reais], class: "form-control", inputmode: "numeric", data: { currency_mask_target: "field", action: "input->currency-mask#mask" } %>
+    </div>
+    <div class="col-12 col-md-6">
+      <label class="form-label mb-1">Embalagem (R$)</label>
+      <%= text_field_tag "product_cost[packaging_reais]", cost_fields[:packaging_reais], class: "form-control", inputmode: "numeric", data: { currency_mask_target: "field", action: "input->currency-mask#mask" } %>
+    </div>
+    <div class="col-12 col-md-6">
+      <label class="form-label mb-1">Perdas (%)</label>
+      <%= text_field_tag "product_cost[losses_percent]", cost_fields[:losses_percent], class: "form-control", inputmode: "decimal", placeholder: "Ex: 5,00" %>
+    </div>
+    <div class="col-12 col-md-6">
+      <label class="form-label mb-1">Mão de obra (R$)</label>
+      <%= text_field_tag "product_cost[labor_reais]", cost_fields[:labor_reais], class: "form-control", inputmode: "numeric", data: { currency_mask_target: "field", action: "input->currency-mask#mask" } %>
+    </div>
+    <div class="col-12 col-md-6">
+      <label class="form-label mb-1">Rateio fixo (R$)</label>
+      <%= text_field_tag "product_cost[fixed_allocation_reais]", cost_fields[:fixed_allocation_reais], class: "form-control", inputmode: "numeric", data: { currency_mask_target: "field", action: "input->currency-mask#mask" } %>
+    </div>
+    <div class="col-12 col-md-6">
+      <label class="form-label mb-1">Taxa canal (%)</label>
+      <%= text_field_tag "product_cost[channel_fee_percent]", cost_fields[:channel_fee_percent], class: "form-control", inputmode: "decimal", placeholder: "Ex: 12,00" %>
+    </div>
   </div>
 
   <div class="admin-modal-actions mt-3">

@@ -1,0 +1,100 @@
+<div class="container-fluid admin-dashboard-container py-4 py-lg-5">
+  <%= render "top", filter_path: admin_dashboard_path %>
+
+  <div class="dashboard-screen-content mt-3">
+  <section class="dashboard-kpis">
+    <article class="kpi-card fade-in-up">
+      <small>Pedidos totais</small>
+      <strong><%= @metrics.dig(:totals, :total_orders) %></strong>
+    </article>
+    <article class="kpi-card fade-in-up">
+      <small>Concluídos</small>
+      <strong><%= @metrics.dig(:totals, :completed_orders) %></strong>
+    </article>
+    <article class="kpi-card fade-in-up">
+      <small>Cancelados</small>
+      <strong><%= @metrics.dig(:totals, :canceled_orders) %></strong>
+    </article>
+    <article class="kpi-card fade-in-up">
+      <small>Taxa cancelamento</small>
+      <strong><%= number_to_percentage(@metrics.dig(:totals, :cancel_rate), precision: 2) %></strong>
+    </article>
+    <article class="kpi-card fade-in-up">
+      <small>Receita líquida</small>
+      <strong><%= money(@metrics.dig(:totals, :revenue_cents)) %></strong>
+    </article>
+    <article class="kpi-card fade-in-up">
+      <small>Ticket médio</small>
+      <strong><%= money(@metrics.dig(:totals, :average_ticket_cents)) %></strong>
+    </article>
+    <article class="kpi-card fade-in-up">
+      <small>Margem operacional</small>
+      <strong><%= number_to_percentage(@metrics.dig(:totals, :operating_margin_percent), precision: 2) %></strong>
+    </article>
+    <article class="kpi-card fade-in-up">
+      <small>Em aberto</small>
+      <strong><%= @metrics.dig(:totals, :open_orders) %></strong>
+    </article>
+  </section>
+
+  <section class="dashboard-grid mt-3">
+    <article class="dashboard-panel fade-in-up">
+      <h2 class="h5 mb-2"><%= ui_icon(:list) %> Participação por modalidade</h2>
+      <div class="pie-block mb-3">
+        <div class="pie-chart" style="background: <%= dashboard_mode_pie_gradient(@metrics[:by_mode]) %>"></div>
+        <ul class="pie-legend mb-0">
+          <% @metrics[:by_mode].each do |mode| %>
+            <li>
+              <span class="pie-legend__dot" style="background: <%= dashboard_mode_color(mode[:mode]) %>"></span>
+              <span><%= mode[:mode].humanize %></span>
+              <strong><%= number_to_percentage(mode[:participation], precision: 1) %></strong>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Modalidade</th>
+              <th>Pedidos</th>
+              <th>Concluídos</th>
+              <th>Participação</th>
+              <th>Receita líquida</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @metrics[:by_mode].each do |mode| %>
+              <tr>
+                <td><%= mode[:mode].humanize %></td>
+                <td><%= mode[:total_orders] %></td>
+                <td><%= mode[:completed_orders] %></td>
+                <td><%= number_to_percentage(mode[:participation], precision: 2) %></td>
+                <td><%= money(mode[:revenue_cents]) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="dashboard-panel fade-in-up">
+      <h2 class="h5 mb-2"><%= ui_icon(:clock) %> Tendência diária</h2>
+      <% if @metrics[:trend].any? %>
+        <% revenue_points = dashboard_line_points(@metrics[:trend].map { |row| row[:revenue_cents].to_f }) %>
+        <div class="line-chart mb-3">
+          <svg viewBox="0 0 560 220" preserveAspectRatio="none" role="img" aria-label="Tendência diária de receita">
+            <polyline points="<%= revenue_points %>" class="line-chart__path" />
+          </svg>
+          <div class="line-chart__labels">
+            <span><%= l(@metrics[:trend].first[:date].to_date, format: :short) %></span>
+            <span><%= l(@metrics[:trend].last[:date].to_date, format: :short) %></span>
+          </div>
+        </div>
+      <% else %>
+        <p class="text-secondary mb-0">Sem pedidos concluídos no período selecionado.</p>
+      <% end %>
+    </article>
+  </section>
+  </div>
+</div>

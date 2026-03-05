@@ -27,6 +27,7 @@ Rails.application.routes.draw do
 
   resource :cart, only: [:show, :update, :destroy] do
     get :delivery_quote
+    get :checkout_preview
   end
   get "geo/suggestions", to: "geo#suggestions"
 
@@ -73,5 +74,5 @@ Rails.application.routes.draw do
     resources :payments, only: :create
   end
 
-  root "home#index"
+  root "products#index"
 end

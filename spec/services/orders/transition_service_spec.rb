@@ -1,6 +1,10 @@
 require "rails_helper"
 
 RSpec.describe Orders::TransitionService do
+  before do
+    Order.open_queue.update_all(status: Order.statuses[:delivered], started_at: Time.current, ready_at: Time.current, delivered_at: Time.current)
+  end
+
   describe "#start_production" do
     let(:admin) do
       User.create!(
@@ -35,6 +39,36 @@ RSpec.describe Orders::TransitionService do
 
       expect(first_order.reload.status).to eq("received")
       expect(second_order.reload.status).to eq("received")
+    end
+  end
+
+  describe "full lifecycle" do
+    let(:admin) do
+      User.create!(
+        name: "Admin Lifecycle",
+        email: "admin-lifecycle@example.com",
+        role: :admin,
+        password: "password123"
+      )
+    end
+
+    it "transitions from received to delivered with timestamps and audit trail" do
+      order = create_received_order(created_at: 1.minute.ago)
+      service = described_class.new(order: order, actor: admin, reason: "spec_flow")
+
+      service.start_production
+      service.finish
+      service.mark_delivered
+
+      order.reload
+
+      expect(order.status).to eq("delivered")
+      expect(order.started_at).to be_present
+      expect(order.ready_at).to be_present
+      expect(order.delivered_at).to be_present
+
+      events = AuditLog.where(order_id: order.id).order(:created_at).pluck(:event)
+      expect(events).to include("start_production", "finish", "mark_delivered")
     end
   end
 

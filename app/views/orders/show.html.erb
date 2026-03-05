@@ -38,12 +38,32 @@
     </div>
   </section>
 
-  <% if @order.order_type_delivery? %>
-    <section class="hero-card mt-3 fade-in-up">
-      <p class="mb-1"><strong>Taxa de entrega:</strong> <%= money(@order.delivery_fee_cents) %></p>
-      <p class="mb-0"><strong>Distância:</strong> <%= @order.delivery_distance_km ? "#{@order.delivery_distance_km} km" : "-" %></p>
-    </section>
-  <% end %>
+  <section class="hero-card mt-3 fade-in-up">
+    <p class="mb-2"><strong>Resumo de cobrança</strong></p>
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <span class="text-secondary">Subtotal</span>
+      <strong><%= money(@order.subtotal_cents) %></strong>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <span class="text-secondary">Desconto</span>
+      <strong><%= money(@order.discount_cents) %></strong>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <span class="text-secondary">Taxa de entrega</span>
+      <strong><%= money(@order.delivery_fee_cents) %></strong>
+    </div>
+    <% if @order.order_type_delivery? %>
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <span class="text-secondary">Distância</span>
+        <strong><%= @order.delivery_distance_km ? "#{@order.delivery_distance_km} km" : "-" %></strong>
+      </div>
+    <% end %>
+    <hr class="my-2">
+    <div class="d-flex justify-content-between align-items-center">
+      <span><strong>Total cobrado</strong></span>
+      <strong><%= money(@order.total_cents) %></strong>
+    </div>
+  </section>
 
   <section class="hero-card mt-3 fade-in-up">
     <% status_copy = case @order.status

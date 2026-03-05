@@ -4,12 +4,41 @@ class CartsController < ApplicationController
   end
 
   def delivery_quote
-    quote = Orders::DeliveryQuoteService.call(cep: params[:cep])
+    quote = Orders::DeliveryQuoteService.call(
+      cep: params[:cep],
+      subtotal_cents: params[:subtotal_cents]
+    )
     render json: quote
   rescue ArgumentError => e
     render json: { error: e.message }, status: :unprocessable_entity
   rescue StandardError
     render json: { error: "Não foi possível calcular a taxa de entrega agora." }, status: :service_unavailable
+  end
+
+  def checkout_preview
+    pricing = Orders::CheckoutPricingService.call(
+      customer: current_customer,
+      items: cart_items_payload,
+      order_type: preview_order_type,
+      coupon_code: params[:coupon_code],
+      delivery_cep: params[:delivery_cep]
+    )
+
+    render json: {
+      subtotal_cents: pricing[:subtotal_cents],
+      discount_cents: pricing[:discount_cents],
+      delivery_fee_cents: pricing[:delivery_fee_cents],
+      total_cents: pricing[:total_cents],
+      delivery_distance_km: pricing[:delivery_distance_km],
+      promotion_applied: pricing[:promotion_applied],
+      promotion_name: pricing[:promotion_name],
+      free_shipping: pricing[:free_shipping],
+      minimum_delivery_order_cents: pricing[:minimum_delivery_order_cents]
+    }
+  rescue ArgumentError => e
+    render json: { error: e.message }, status: :unprocessable_entity
+  rescue StandardError
+    render json: { error: "Não foi possível atualizar o resumo do pedido agora." }, status: :service_unavailable
   end
 
   def update
@@ -51,6 +80,7 @@ class CartsController < ApplicationController
         @products = Product.where(active: true).includes(:category)
         @products = @products.where(category_id: @selected_category_id) if @selected_category_id.present?
         @products = @products.order(:name)
+        load_catalog_mental_triggers(products_scope: @products)
       end
       format.html { redirect_back fallback_location: cart_path }
     end
@@ -62,6 +92,25 @@ class CartsController < ApplicationController
   end
 
   private
+
+  def preview_order_type
+    return :table if table_session_active?
+
+    value = params[:order_type].to_s.downcase
+    return :pickup unless Order.order_types.key?(value)
+
+    value.to_sym
+  end
+
+  def cart_items_payload
+    session.fetch(:cart, {}).map do |product_id, entry|
+      if entry.is_a?(Hash)
+        { product_id: product_id.to_i, quantity: entry["quantity"].to_i, notes: entry["note"] }
+      else
+        { product_id: product_id.to_i, quantity: entry.to_i }
+      end
+    end
+  end
 
   def load_cart_state
     @items = cart_items

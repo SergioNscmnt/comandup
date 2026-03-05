@@ -26,6 +26,7 @@ class Order < ApplicationRecord
   validates :customer_id, presence: true, if: -> { order_type_pickup? || order_type_delivery? }
   validates :delivery_address, presence: true, if: :order_type_delivery?
   validates :service_token, presence: true, uniqueness: true
+  validates :idempotency_key, uniqueness: true, allow_nil: true
 
   def can_cancel_by_customer?
     received?

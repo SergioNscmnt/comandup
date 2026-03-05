@@ -6,6 +6,10 @@
   <%= render "products/cart_summary_chip" %>
 <% end %>
 
+<%= turbo_stream.replace "products-conversion-triggers" do %>
+  <%= render "products/conversion_triggers" %>
+<% end %>
+
 <%= turbo_stream.replace "products-category-nav" do %>
   <%= render "products/category_nav" %>
 <% end %>

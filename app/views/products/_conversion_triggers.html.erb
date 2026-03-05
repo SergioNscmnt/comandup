@@ -1,0 +1,49 @@
+<% tips = [] %>
+<% if @delivery_remaining_cents.positive? %>
+  <% tips << "Faltam #{money(@delivery_remaining_cents)} para atingir o pedido minimo de delivery." %>
+<% else %>
+  <% tips << "Pedido minimo atingido. Voce ja pode finalizar o delivery sem bloqueio de valor." %>
+<% end %>
+<% tips << "#{@delivered_today_count} pedidos finalizados hoje." %>
+<% tips << "#{@open_queue_count} pedidos em preparo neste momento." %>
+<% tips << "Tempo medio estimado de preparo: #{@avg_prep_minutes} min." %>
+
+<section id="products-conversion-triggers"
+         class="conversion-triggers mt-3 fade-in-up"
+         data-controller="mental-triggers"
+         data-mental-triggers-tips-value="<%= tips.to_json %>"
+         data-mental-triggers-progress-value="<%= @delivery_progress_percent %>"
+         data-mental-triggers-cart-total-value="<%= @catalog_cart_total_cents %>">
+  <article class="conversion-card conversion-card--goal">
+    <p class="conversion-card__eyebrow"><%= ui_icon(:map) %> Meta de pedido</p>
+    <h2 class="h6 mb-1">Pedido minimo para delivery: <%= money(@delivery_goal_cents) %></h2>
+    <p class="text-secondary mb-2">
+      <% if @delivery_remaining_cents.positive? %>
+        Faltam <strong><%= money(@delivery_remaining_cents) %></strong> para destravar.
+      <% else %>
+        Meta concluida. Seu pedido ja pode seguir para checkout.
+      <% end %>
+    </p>
+    <div class="conversion-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= @delivery_progress_percent %>">
+      <div class="conversion-progress__fill"
+           data-mental-triggers-target="progressFill"
+           style="width: <%= @delivery_progress_percent %>%"></div>
+    </div>
+  </article>
+
+  <article class="conversion-card conversion-card--social">
+    <p class="conversion-card__eyebrow"><%= ui_icon(:chart) %> Sinal de confianca</p>
+    <h2 class="h6 mb-1">Momento da cozinha em tempo real</h2>
+    <p class="text-secondary mb-0 conversion-card__tip" data-mental-triggers-target="tip" aria-live="polite"><%= tips.first %></p>
+  </article>
+
+  <article class="conversion-card conversion-card--cta">
+    <p class="conversion-card__eyebrow"><%= ui_icon(:cart_plus) %> Proxima acao</p>
+    <h2 class="h6 mb-1">Revise e conclua seu pedido</h2>
+    <p class="text-secondary mb-2">Quanto antes confirmar, mais cedo entra na fila.</p>
+    <%= link_to cart_path, class: "btn btn-brand w-100 justify-content-center", data: { mental_triggers_target: "cta" } do %>
+      <%= ui_icon(:cart) %>
+      <span>Ir para o carrinho</span>
+    <% end %>
+  </article>
+</section>

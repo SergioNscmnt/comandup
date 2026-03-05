@@ -27,11 +27,32 @@ class User < ApplicationRecord
   end
 
   def self.company_account
-    company_admins.first
+    admins = company_admins.to_a
+    return nil if admins.empty?
+
+    admins.max_by do |admin|
+      [
+        admin.company_profile_score,
+        admin.updated_at.to_i,
+        -admin.id.to_i
+      ]
+    end
   end
 
   def company_location_query
     [company_address, company_cep, "Brasil"].filter_map { |value| value.to_s.strip.presence }.join(", ")
+  end
+
+  def company_profile_score
+    fields = [
+      company_address,
+      company_cep,
+      company_delivery_radius_km,
+      company_delivery_fee_per_km_cents,
+      company_delivery_min_fee_cents,
+      company_delivery_min_order_cents
+    ]
+    fields.count(&:present?)
   end
 
   private

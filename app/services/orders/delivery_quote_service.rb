@@ -6,12 +6,13 @@ module Orders
     RATE_PER_KM_CENTS = 300
     MIN_FEE_CENTS = 1000
 
-    def self.call(cep:)
-      new(cep: cep).call
+    def self.call(cep:, subtotal_cents: nil)
+      new(cep: cep, subtotal_cents: subtotal_cents).call
     end
 
-    def initialize(cep:)
+    def initialize(cep:, subtotal_cents: nil)
       @cep = cep.to_s.gsub(/\D/, "")
+      @subtotal_cents = subtotal_cents.to_i
     end
 
     def call
@@ -25,7 +26,7 @@ module Orders
         raise ArgumentError, "Entrega indisponível para este CEP: fora do raio de #{max_delivery_radius_km.to_s.tr('.', ',')} km."
       end
 
-      fee_cents = [(distance_km * fee_per_km_cents).round, minimum_fee_cents].max
+      fee_cents = free_shipping_by_minimum_order? ? 0 : [(distance_km * fee_per_km_cents).round, minimum_fee_cents].max
 
       {
         distance_km: distance_km,
@@ -63,12 +64,10 @@ module Orders
       company = company_account
       raise ArgumentError, "Cadastre uma conta de administrador da empresa." unless company
 
-      query = company.company_location_query
-      if query.blank?
-        raise ArgumentError, "Cadastre o endereço da empresa no painel admin para calcular a entrega."
-      end
+      coordinates = store_coordinates_candidates(company).lazy.map { |uri| parse_coordinates(uri) }.find(&:present?)
+      return coordinates if coordinates
 
-      geocode_address!(query)
+      raise ArgumentError, "Não foi possível localizar o endereço da empresa para calcular a entrega."
     end
 
     def company_account
@@ -78,6 +77,15 @@ module Orders
     def max_delivery_radius_km
       value = company_account&.company_delivery_radius_km
       value.present? ? value.to_f : nil
+    end
+
+    def minimum_delivery_order_cents
+      company_account&.company_delivery_min_order_cents.to_i
+    end
+
+    def free_shipping_by_minimum_order?
+      minimum = minimum_delivery_order_cents
+      minimum.positive? && @subtotal_cents >= minimum
     end
 
     def geocode_cep!(cep)
@@ -92,7 +100,7 @@ module Orders
       queries << [formatted_cep, "Brasil"].join(", ")
 
       # 1) Busca estruturada por CEP no Brasil
-      structured_uri = URI("https://nominatim.openstreetmap.org/search?#{URI.encode_www_form(postalcode: formatted_cep, countrycodes: "br", format: "jsonv2", limit: 1)}")
+      structured_uri = structured_postalcode_uri(formatted_cep)
       result = parse_coordinates(structured_uri)
       return result if result
 
@@ -100,7 +108,7 @@ module Orders
       queries.each do |query|
         next if query.blank?
 
-        uri = URI("https://nominatim.openstreetmap.org/search?#{URI.encode_www_form(q: query, countrycodes: "br", format: "jsonv2", limit: 1)}")
+        uri = text_search_uri(query)
         result = parse_coordinates(uri)
         return result if result
       end
@@ -109,8 +117,48 @@ module Orders
     end
 
     def geocode_address!(query)
-      uri = URI("https://nominatim.openstreetmap.org/search?#{URI.encode_www_form(q: query, format: "jsonv2", limit: 1)}")
+      uri = text_search_uri(query)
       parse_coordinates!(uri, "Não foi possível localizar o endereço da empresa para calcular a entrega.")
+    end
+
+    def store_coordinates_candidates(company)
+      candidates = []
+      company_cep_digits = company.company_cep.to_s.gsub(/\D/, "")
+      formatted_company_cep = format_cep(company_cep_digits) if company_cep_digits.match?(/\A\d{8}\z/)
+
+      candidates << structured_postalcode_uri(formatted_company_cep) if formatted_company_cep.present?
+      candidates << text_search_uri(company.company_location_query) if company.company_location_query.present?
+
+      city_uf = city_uf_from_cep_candidate(company_cep_digits)
+      if city_uf.present?
+        city_uf_query = [city_uf[:city], city_uf[:uf], "Brasil"].join(", ")
+        candidates << text_search_uri(city_uf_query)
+      end
+
+      candidates << text_search_uri([formatted_company_cep, "Brasil"].join(", ")) if formatted_company_cep.present?
+
+      candidates.compact.uniq(&:to_s)
+    end
+
+    def city_uf_from_cep_candidate(cep_digits)
+      return {} unless cep_digits.match?(/\A\d{8}\z/)
+
+      data = fetch_via_cep(cep_digits)
+      city = data["localidade"].to_s.strip
+      uf = data["uf"].to_s.strip.upcase
+      return {} if city.blank? || uf.blank?
+
+      { city: city, uf: uf }
+    rescue ArgumentError
+      {}
+    end
+
+    def structured_postalcode_uri(postalcode)
+      URI("https://nominatim.openstreetmap.org/search?#{URI.encode_www_form(postalcode: postalcode, countrycodes: "br", format: "jsonv2", limit: 1)}")
+    end
+
+    def text_search_uri(query)
+      URI("https://nominatim.openstreetmap.org/search?#{URI.encode_www_form(q: query, countrycodes: "br", format: "jsonv2", limit: 1)}")
     end
 
     def parse_coordinates(uri)

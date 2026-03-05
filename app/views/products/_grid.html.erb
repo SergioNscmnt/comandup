@@ -32,13 +32,13 @@
               <%= hidden_field_tag :product_id, product.id %>
               <%= hidden_field_tag :category_id, @selected_category_id %>
 
-              <button type="submit" name="operation" value="decrease" class="btn btn-sm btn-outline-brand icon-btn" aria-label="<%= "Diminuir quantidade de #{product.name}" %>">
+              <button type="submit" name="operation" value="decrease" class="btn btn-sm icon-btn decision-btn decision-btn--remove" aria-label="<%= "Diminuir quantidade de #{product.name}" %>">
                 <%= ui_icon(:dash) %>
               </button>
 
               <span class="product-quantity-value"><%= current_qty %></span>
 
-              <button type="submit" name="operation" value="add" class="btn btn-sm btn-outline-brand icon-btn" aria-label="<%= "Aumentar quantidade de #{product.name}" %>">
+              <button type="submit" name="operation" value="add" class="btn btn-sm icon-btn decision-btn decision-btn--add" aria-label="<%= "Aumentar quantidade de #{product.name}" %>">
                 <%= ui_icon(:plus) %>
               </button>
             <% end %>

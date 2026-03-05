@@ -91,6 +91,20 @@ class ApplicationController < ActionController::Base
     current_table_number.present?
   end
 
+  def load_catalog_mental_triggers(products_scope:)
+    @delivery_goal_cents = User.company_account&.company_delivery_min_order_cents.to_i
+    @delivery_goal_cents = 4000 if @delivery_goal_cents <= 0
+
+    @catalog_cart_total_cents = cart_total_cents
+    @delivery_remaining_cents = [@delivery_goal_cents - @catalog_cart_total_cents, 0].max
+    @delivery_progress_percent = ((@catalog_cart_total_cents.to_f / @delivery_goal_cents) * 100).round.clamp(0, 100)
+
+    @delivered_today_count = Order.where(status: :delivered).where(delivered_at: Time.zone.now.all_day).count
+    @open_queue_count = Order.open_queue.count
+    @avg_prep_minutes = products_scope.average(:prep_minutes).to_f.round
+    @avg_prep_minutes = 10 if @avg_prep_minutes <= 0
+  end
+
   def require_admin!
     raise Pundit::NotAuthorizedError unless current_admin
   end

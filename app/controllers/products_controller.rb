@@ -6,6 +6,7 @@ class ProductsController < ApplicationController
     @products = Product.where(active: true).includes(:category)
     @products = @products.where(category_id: @selected_category_id) if @selected_category_id.present?
     @products = @products.order(:name)
+    load_catalog_mental_triggers(products_scope: @products)
 
     respond_to do |format|
       format.html

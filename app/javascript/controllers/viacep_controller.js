@@ -55,7 +55,11 @@ export default class extends Controller {
 
     try {
       await this.loadQuote(cep)
-      this.setStatus("Rua e bairro preenchidos. Informe número e complemento.")
+      if (this.lastFeeCents === 0) {
+        this.setStatus("Pedido mínimo atingido: entrega com taxa zero.")
+      } else {
+        this.setStatus("Rua e bairro preenchidos. Informe número e complemento.")
+      }
     } catch (error) {
       this.setStatus(error.message || "Endereço encontrado, mas não foi possível calcular a taxa agora.", true)
       this.clearQuote()
@@ -96,7 +100,7 @@ export default class extends Controller {
   }
 
   async loadQuote(cep) {
-    const response = await fetch(`/cart/delivery_quote?cep=${encodeURIComponent(cep)}`)
+    const response = await fetch(`/cart/delivery_quote?cep=${encodeURIComponent(cep)}&subtotal_cents=${encodeURIComponent(this.subtotalCentsValue)}`)
     const data = await response.json()
     if (!response.ok) throw new Error(data.error || "Não foi possível calcular a taxa de entrega.")
 
@@ -104,22 +108,25 @@ export default class extends Controller {
   }
 
   setQuote(quote) {
+    this.lastFeeCents = Number(quote.fee_cents || 0)
+
     if (this.hasDistanceTarget) {
       const distance = Number(quote.distance_km || 0)
       this.distanceTarget.textContent = `${distance.toFixed(2)} km`
     }
 
     if (this.hasFeeTarget) {
-      this.feeTarget.textContent = this.money(Number(quote.fee_cents || 0))
+      this.feeTarget.textContent = this.money(this.lastFeeCents)
     }
 
     if (this.hasTotalTarget) {
-      const totalCents = this.subtotalCentsValue + Number(quote.fee_cents || 0)
+      const totalCents = this.subtotalCentsValue + this.lastFeeCents
       this.totalTarget.textContent = this.money(totalCents)
     }
   }
 
   clearQuote() {
+    this.lastFeeCents = 0
     if (this.hasDistanceTarget) this.distanceTarget.textContent = "-"
     if (this.hasFeeTarget) this.feeTarget.textContent = this.money(0)
     if (this.hasTotalTarget) this.totalTarget.textContent = this.money(this.subtotalCentsValue)

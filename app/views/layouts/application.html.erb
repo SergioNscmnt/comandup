@@ -22,68 +22,74 @@
           <span>ComandUp</span>
         <% end %>
 
-        <nav class="nav-links">
+        <details class="nav-accordion" data-controller="nav-accordion">
+          <summary class="icon-link nav-accordion__trigger">
+            <%= ui_icon(:list) %>
+            <span>Menu</span>
+          </summary>
 
-          <%= render "shared/nav_cart" %>
+          <nav class="nav-links">
+            <%= render "shared/nav_cart" %>
 
-          <%= link_to products_path, class: "icon-link" do %>
-            <%= ui_icon(:box) %>
-            <span>Produtos</span>
-          <% end %>
+            <%= link_to products_path, class: "icon-link" do %>
+              <%= ui_icon(:box) %>
+              <span>Produtos</span>
+            <% end %>
 
-          <% if current_customer %>
-            <%= link_to orders_path, class: "icon-link" do %>
-              <%= ui_icon(:receipt) %>
-              <span>Meus pedidos</span>
+            <% if current_customer %>
+              <%= link_to orders_path, class: "icon-link" do %>
+                <%= ui_icon(:receipt) %>
+                <span>Meus pedidos</span>
+              <% end %>
+              <%= link_to account_path, class: "icon-link" do %>
+                <%= ui_icon(:user) %>
+                <span>Minha conta</span>
+              <% end %>
+              <%= button_to customer_logout_path, method: :delete, class: "icon-link nav-action-link" do %>
+                <%= ui_icon(:logout) %>
+                <span>Sair cliente</span>
+              <% end %>
             <% end %>
-            <%= link_to account_path, class: "icon-link" do %>
-              <%= ui_icon(:user) %>
-              <span>Minha conta</span>
-            <% end %>
-            <%= button_to customer_logout_path, method: :delete, class: "icon-link nav-action-link" do %>
-              <%= ui_icon(:logout) %>
-              <span>Sair cliente</span>
-            <% end %>
-          <% end %>
 
-          <% if current_admin %>
-            <%= link_to admin_dashboard_path, class: "icon-link" do %>
-              <%= ui_icon(:chart) %>
-              <span>Dashboard</span>
+            <% if current_admin %>
+              <%= link_to admin_dashboard_path, class: "icon-link" do %>
+                <%= ui_icon(:chart) %>
+                <span>Dashboard</span>
+              <% end %>
+              <%= link_to admin_queue_path, class: "icon-link" do %>
+                <%= ui_icon(:list) %>
+                <span>Fila de Pedidos</span>
+              <% end %>
+              <%= link_to edit_admin_company_profile_path, class: "icon-link" do %>
+                <%= ui_icon(:receipt) %>
+                <span>Empresa</span>
+              <% end %>
+              <%= button_to admin_logout_path, method: :delete, class: "icon-link nav-action-link" do %>
+                <%= ui_icon(:logout) %>
+                <span>Sair</span>
+              <% end %>
             <% end %>
-            <%= link_to admin_queue_path, class: "icon-link" do %>
-              <%= ui_icon(:list) %>
-              <span>Fila de Pedidos</span>
-            <% end %>
-            <%= link_to edit_admin_company_profile_path, class: "icon-link" do %>
-              <%= ui_icon(:receipt) %>
-              <span>Empresa</span>
-            <% end %>
-            <%= button_to admin_logout_path, method: :delete, class: "icon-link nav-action-link" do %>
-              <%= ui_icon(:logout) %>
-              <span>Sair</span>
-            <% end %>
-          <% end %>
 
-          <% unless current_customer || current_admin %>
-            <details class="nav-auth-dropdown">
-              <summary class="icon-link nav-auth-trigger">
-                <%= ui_icon(:login) %>
-                <span>Entrar</span>
-              </summary>
-              <div class="nav-auth-menu">
-                <%= link_to customer_login_path, class: "icon-link" do %>
+            <% unless current_customer || current_admin %>
+              <details class="nav-auth-dropdown">
+                <summary class="icon-link nav-auth-trigger">
                   <%= ui_icon(:login) %>
-                  <span>Área do Cliente</span>
-                <% end %>
-                <%= link_to admin_login_path, class: "icon-link" do %>
-                  <%= ui_icon(:login) %>
-                  <span>Área Administrativa</span>
-                <% end %>
-              </div>
-            </details>
-          <% end %>
-        </nav>
+                  <span>Entrar</span>
+                </summary>
+                <div class="nav-auth-menu">
+                  <%= link_to customer_login_path, class: "icon-link" do %>
+                    <%= ui_icon(:login) %>
+                    <span>Área do Cliente</span>
+                  <% end %>
+                  <%= link_to admin_login_path, class: "icon-link" do %>
+                    <%= ui_icon(:login) %>
+                    <span>Área Administrativa</span>
+                  <% end %>
+                </div>
+              </details>
+            <% end %>
+          </nav>
+        </details>
       </div>
     </header>
 

@@ -21,7 +21,7 @@ module Admin
     private
 
     def combo_params
-      params.require(:combo).permit(:name, :description, :active, :price_reais)
+      params.require(:combo).permit(:name, :description, :active, :price_reais, :image_url)
     end
 
     def money_to_cents(raw)

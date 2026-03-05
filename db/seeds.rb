@@ -1,3 +1,8 @@
+if Rails.env.test?
+  puts "Skipping seeds in test environment."
+  return
+end
+
 seed_password = "password123"
 
 admins = [

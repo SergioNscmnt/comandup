@@ -28,6 +28,10 @@
             <label class="form-label mb-1">Descrição</label>
             <%= f.text_area :description, class: "form-control", rows: 3 %>
           </div>
+          <div class="col-12">
+            <label class="form-label mb-1">URL da imagem</label>
+            <%= f.url_field :image_url, class: "form-control", placeholder: "https://..." %>
+          </div>
         </div>
 
         <div class="admin-modal-actions mt-3">

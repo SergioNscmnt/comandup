@@ -1,6 +1,8 @@
 require "rails_helper"
 
 RSpec.describe "Customer authentication", type: :request do
+  before { host! "localhost" }
+
   describe "POST /signup" do
     it "creates a customer account and signs in" do
       expect do

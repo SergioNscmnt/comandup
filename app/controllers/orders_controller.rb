@@ -23,11 +23,12 @@ class OrdersController < ApplicationController
       table_number: effective_table_number,
       delivery_address: params[:delivery_address],
       delivery_cep: params[:delivery_cep],
-      coupon_code: params[:coupon_code]
+      coupon_code: params[:coupon_code],
+      idempotency_key: request_idempotency_key
     ).call
     authorize order, :create?
 
-    if Rails.configuration.x.order_settings.modo_pagamento == "POS_PAGO"
+    if Rails.configuration.x.order_settings.modo_pagamento == "POS_PAGO" && order.draft?
       Orders::TransitionService.new(order: order, actor: current_customer, reason: "pos_pago_auto").confirm_received
     end
 
@@ -68,7 +69,11 @@ class OrdersController < ApplicationController
   private
 
   def order_params
-    params.permit(:order_type, :table_number, :delivery_address, :delivery_cep, :coupon_code, items: [:product_id, :combo_id, :quantity, :notes])
+    params.permit(:order_type, :table_number, :delivery_address, :delivery_cep, :coupon_code, :idempotency_key, items: [:product_id, :combo_id, :quantity, :notes])
+  end
+
+  def request_idempotency_key
+    request.headers["X-Idempotency-Key"].to_s.strip.presence || order_params[:idempotency_key].to_s.strip.presence
   end
 
   def cart_items_payload

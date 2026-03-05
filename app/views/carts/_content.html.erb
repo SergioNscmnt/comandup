@@ -63,7 +63,14 @@
   </section>
 
   <section class="hero-card mt-3 fade-in-up">
-    <%= form_with url: orders_path, method: :post, local: true, data: { controller: "delivery-fields" } do |f| %>
+    <%= form_with url: orders_path,
+                  method: :post,
+                  local: true,
+                  data: {
+                    controller: "delivery-fields checkout-preview",
+                    checkout_preview_url_value: checkout_preview_cart_path,
+                    checkout_preview_order_type_value: (table_session_active? ? "table" : nil)
+                  } do |f| %>
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div>
           <p class="mb-1 text-secondary"><%= ui_icon(:receipt) %> Subtotal</p>
@@ -73,7 +80,15 @@
 
       <div class="mt-3 mb-1">
         <label class="form-label mb-1" for="coupon_code">Cupom (opcional)</label>
-        <%= text_field_tag :coupon_code, params[:coupon_code], id: "coupon_code", class: "form-control", placeholder: "Ex: BEMVINDO10" %>
+        <%= text_field_tag :coupon_code,
+                           params[:coupon_code],
+                           id: "coupon_code",
+                           class: "form-control",
+                           placeholder: "Ex: BEMVINDO10",
+                           data: {
+                             checkout_preview_target: "coupon",
+                             action: "input->checkout-preview#schedule blur->checkout-preview#refresh"
+                           } %>
         <small class="text-secondary">Cupons de primeiro pedido só funcionam para clientes sem pedidos anteriores.</small>
       </div>
 
@@ -89,11 +104,11 @@
         <p class="mb-2"><strong>Como você quer receber?</strong></p>
         <div class="d-flex flex-wrap gap-3 mb-3">
           <label class="d-flex align-items-center gap-2">
-            <%= radio_button_tag :order_type, "pickup", default_order_type == "pickup", data: { action: "change->delivery-fields#toggle" } %>
+            <%= radio_button_tag :order_type, "pickup", default_order_type == "pickup", data: { action: "change->delivery-fields#toggle change->checkout-preview#refresh" } %>
             <span>Retirada</span>
           </label>
           <label class="d-flex align-items-center gap-2">
-            <%= radio_button_tag :order_type, "delivery", false, data: { action: "change->delivery-fields#toggle", delivery_fields_target: "deliveryRadio" } %>
+            <%= radio_button_tag :order_type, "delivery", false, data: { action: "change->delivery-fields#toggle change->checkout-preview#refresh", delivery_fields_target: "deliveryRadio" } %>
             <span>Delivery</span>
           </label>
         </div>
@@ -103,7 +118,18 @@
         <label class="form-label mb-1">Endereço de entrega (somente delivery)</label>
         <div class="row g-2 mb-2 align-items-end">
           <div class="col-12 col-md-3">
-            <%= text_field_tag :delivery_cep, "", class: "form-control", placeholder: "CEP (00000-000)", maxlength: 9, inputmode: "numeric", data: { viacep_target: "cep", action: "input->viacep#maskCep blur->viacep#search", delivery_fields_target: "field", required_when_delivery: true } %>
+            <%= text_field_tag :delivery_cep, "",
+                               class: "form-control",
+                               placeholder: "CEP (00000-000)",
+                               maxlength: 9,
+                               inputmode: "numeric",
+                               data: {
+                                 viacep_target: "cep",
+                                 checkout_preview_target: "cep",
+                                 action: "input->viacep#maskCep input->checkout-preview#schedule blur->viacep#search blur->checkout-preview#refresh",
+                                 delivery_fields_target: "field",
+                                 required_when_delivery: true
+                               } %>
           </div>
           <div class="col-12 col-md-auto">
             <button type="button" class="btn btn-outline-brand text-nowrap w-100" data-action="viacep#search">Buscar CEP</button>
@@ -137,6 +163,34 @@
         </div>
 
         <%= hidden_field_tag :delivery_address, "", data: { viacep_target: "address", delivery_fields_target: "field" } %>
+      </div>
+
+      <div class="mt-3 p-3 border rounded-3 bg-white">
+        <p class="mb-2"><strong><%= ui_icon(:receipt) %> Resumo final do pedido</strong></p>
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <span class="text-secondary">Subtotal</span>
+          <strong><%= money(@subtotal_cents) %></strong>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <span class="text-secondary">Desconto (cupom)</span>
+          <strong data-checkout-preview-target="discount"><%= money(0) %></strong>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <span class="text-secondary">Taxa de entrega</span>
+          <strong data-checkout-preview-target="fee"><%= money(0) %></strong>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <span class="text-secondary">Distância estimada</span>
+          <strong data-checkout-preview-target="distance">-</strong>
+        </div>
+        <hr class="my-2">
+        <div class="d-flex justify-content-between align-items-center">
+          <span><strong>Total a pagar</strong></span>
+          <strong data-checkout-preview-target="total"><%= money(@subtotal_cents) %></strong>
+        </div>
+        <small class="text-secondary d-block mt-2" data-checkout-preview-target="status">
+          Resumo atualizado conforme regras de cupom e frete.
+        </small>
       </div>
 
       <%= f.button class: "btn btn-brand icon-btn" do %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_27_003000) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_04_083000) do
   create_table "audit_logs", charset: "utf8mb4", collation: "utf8mb4_uca1400_ai_ci", force: :cascade do |t|
     t.bigint "order_id", null: false
     t.bigint "user_id"
@@ -56,6 +56,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_27_003000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "description"
+    t.string "image_url"
     t.index ["active"], name: "index_combos_on_active"
     t.check_constraint "`price_cents` >= 0", name: "chk_combos_price_cents"
   end
@@ -100,8 +101,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_27_003000) do
     t.datetime "canceled_at"
     t.integer "delivery_fee_cents", default: 0, null: false
     t.decimal "delivery_distance_km", precision: 8, scale: 2
+    t.string "idempotency_key"
     t.index ["customer_id", "created_at"], name: "index_orders_on_customer_id_and_created_at"
     t.index ["customer_id"], name: "index_orders_on_customer_id"
+    t.index ["idempotency_key"], name: "index_orders_on_idempotency_key", unique: true
     t.index ["order_type", "status", "created_at"], name: "idx_orders_type_status_created"
     t.index ["order_type"], name: "index_orders_on_order_type"
     t.index ["service_token"], name: "index_orders_on_service_token", unique: true

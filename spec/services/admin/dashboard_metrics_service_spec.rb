@@ -113,4 +113,39 @@ RSpec.describe Admin::DashboardMetricsService, type: :service do
     expect(metrics.dig(:simulation, :hero_product, :product_name)).to eq(product.name)
     expect(metrics.dig(:simulation, :recommendation, :candidates)).to be_present
   end
+
+  it "builds table dashboard cards and occupancy totals" do
+    Order.create!(
+      customer: customer,
+      status: :in_production,
+      order_type: :table,
+      table_number: "Mesa 01",
+      subtotal_cents: 4550,
+      discount_cents: 0,
+      total_cents: 4550,
+      delivery_fee_cents: 0,
+      service_token: SecureRandom.hex(12),
+      received_at: 20.minutes.ago,
+      eta_minutes: 15
+    )
+
+    Order.create!(
+      customer: customer,
+      status: :ready,
+      order_type: :table,
+      table_number: "Mesa 03",
+      subtotal_cents: 8902,
+      discount_cents: 0,
+      total_cents: 8902,
+      delivery_fee_cents: 0,
+      service_token: SecureRandom.hex(12),
+      ready_at: 8.minutes.ago
+    )
+
+    metrics = described_class.new(period: "month", order_type: nil, table_state: "occupied").call
+
+    expect(metrics.dig(:table_dashboard, :totals, :occupied_tables)).to eq(2)
+    expect(metrics.dig(:table_dashboard, :totals, :attention_tables)).to eq(2)
+    expect(metrics.dig(:table_dashboard, :tables).map { |table| table[:number] }).to eq([1, 3])
+  end
 end

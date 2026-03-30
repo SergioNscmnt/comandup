@@ -25,8 +25,10 @@
                     { label: "Iniciar", path: start_production_admin_order_path(order), icon: :clock }
                   elsif order.in_production?
                     { label: "Pronto", path: finish_admin_order_path(order), icon: :check }
+                  elsif order.ready? && order.order_type_table?
+                    { label: "Fechar Mesa", path: checkout_admin_order_path(order), icon: :receipt, method: :get }
                   elsif order.ready?
-                    { label: "Finalizar", path: mark_delivered_admin_order_path(order), icon: :check }
+                    { label: "Finalizar", path: mark_delivered_admin_order_path(order), icon: :check, method: :post }
                   end %>
       <article class="queue-card queue-order-card queue-order-card--<%= order.status %> fade-in-up fade-delay-admin-<%= index % 8 %>" data-controller="queue-card">
         <div class="queue-order-card__header">
@@ -34,7 +36,13 @@
             <span class="queue-rank">#<%= order.queue_position || index + 1 %></span>
             <div>
               <h2 class="h6 mb-0"><%= ui_icon(:receipt) %> Pedido #<%= order.id %></h2>
-              <small class="text-secondary"><%= l(order.created_at, format: :short) %></small>
+              <small class="text-secondary">
+                <% if order.order_type_table? %>
+                  <%= link_to order.human_table_label, admin_order_path(order), class: "queue-order-card__table-link" %>
+                <% else %>
+                  <%= l(order.created_at, format: :short) %>
+                <% end %>
+              </small>
             </div>
           </div>
           <div class="queue-order-card__meta">
@@ -92,9 +100,16 @@
 
         <% if action %>
           <div class="queue-order-card__footer">
-            <%= button_to action[:path], method: :post, class: "btn btn-sm btn-outline-brand icon-btn" do %>
-              <%= ui_icon(action[:icon]) %>
-              <span><%= action[:label] %></span>
+            <% if action[:method] == :get %>
+              <%= link_to action[:path], class: "btn btn-sm btn-outline-brand icon-btn" do %>
+                <%= ui_icon(action[:icon]) %>
+                <span><%= action[:label] %></span>
+              <% end %>
+            <% else %>
+              <%= button_to action[:path], method: action[:method] || :post, class: "btn btn-sm btn-outline-brand icon-btn" do %>
+                <%= ui_icon(action[:icon]) %>
+                <span><%= action[:label] %></span>
+              <% end %>
             <% end %>
           </div>
         <% elsif order.received? %>

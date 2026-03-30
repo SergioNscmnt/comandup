@@ -1,0 +1,189 @@
+<div class="container-fluid py-4 py-lg-5">
+  <section class="table-command-shell fade-in-up">
+    <aside class="table-checkout-sidebar">
+      <div class="table-checkout-brand">
+        <strong>Comand Up</strong>
+        <span><%= l(Time.current, format: "%H:%M") %> • <%= l(Time.current.to_date, format: "%A") %></span>
+      </div>
+
+      <nav class="table-checkout-nav">
+        <%= link_to admin_dashboard_path do %>
+          <%= ui_icon(:grid) %>
+          <span>Dashboard</span>
+        <% end %>
+        <%= link_to checkout_admin_order_path(@order) do %>
+          <%= ui_icon(:list) %>
+          <span>Mesas</span>
+        <% end %>
+        <span class="is-active">
+          <%= ui_icon(:receipt) %>
+          <span>Comandas</span>
+        </span>
+        <%= link_to menu_admin_order_path(@order) do %>
+          <%= ui_icon(:box) %>
+          <span>Menu</span>
+        <% end %>
+        <%= link_to finance_admin_dashboard_path do %>
+          <%= ui_icon(:chart) %>
+          <span>Relatórios</span>
+        <% end %>
+      </nav>
+
+      <div class="table-command-sidebar__cta">
+        <%= link_to products_path, class: "btn btn-brand icon-btn justify-content-center" do %>
+          <%= ui_icon(:plus) %>
+          <span>New Order</span>
+        <% end %>
+      </div>
+
+      <div class="table-checkout-sidebar__footer">
+        <span><%= ui_icon(:user) %> Support</span>
+        <%= button_to admin_logout_path, method: :delete, class: "table-checkout-sidebar__logout" do %>
+          <%= ui_icon(:logout) %>
+          <span>Logout</span>
+        <% end %>
+      </div>
+    </aside>
+
+    <div class="table-command-main">
+      <header class="table-command-topbar">
+        <nav class="table-command-topbar__tabs">
+          <span>Dashboard</span>
+          <span>Mesas</span>
+          <span class="is-active">Comandas</span>
+        </nav>
+
+        <div class="table-checkout-topbar__actions">
+          <button type="button" class="table-checkout-icon" aria-label="Notificações"><%= ui_icon(:bell) %></button>
+          <button type="button" class="table-checkout-icon" aria-label="Configurações"><%= ui_icon(:gear) %></button>
+          <span class="table-checkout-avatar"><%= ui_icon(:user) %></span>
+        </div>
+      </header>
+
+      <section class="table-command-head">
+        <div>
+          <p class="table-command-head__eyebrow">Mesas • <%= @order.human_table_label.upcase %></p>
+          <h1><%= @order.human_table_label %></h1>
+          <p>
+            <%= pluralize(@order.table_checkout_people_count, "Pessoa", "Pessoas") %> •
+            <span class="table-command-head__status"><%= ui_icon(:clock) %> <%= @order.table_command_active_for_label %></span>
+          </p>
+        </div>
+
+        <div class="table-command-head__actions">
+          <%= link_to checkout_admin_order_path(@order), class: "btn btn-outline-brand icon-btn" do %>
+            <%= ui_icon(:receipt) %>
+            <span>Prévia da Conta</span>
+          <% end %>
+          <%= link_to menu_admin_order_path(@order), class: "btn btn-brand icon-btn" do %>
+            <%= ui_icon(:plus) %>
+            <span>Adicionar Itens</span>
+          <% end %>
+        </div>
+      </section>
+
+      <section class="table-command-layout">
+        <article class="table-command-card table-command-items">
+          <header class="table-command-card__header">
+            <small>Itens da Comanda</small>
+          </header>
+
+          <ul class="table-command-items__list">
+            <% @order.table_command_rows.each do |item| %>
+              <li class="table-command-item is-<%= item[:state] %>">
+                <span class="table-command-item__qty"><%= item[:quantity] %>x</span>
+                <div class="table-command-item__copy">
+                  <strong><%= item[:name] %></strong>
+                  <% if item[:note].present? %>
+                    <span><%= item[:note] %></span>
+                  <% end %>
+                  <small><%= item[:waiting_label] %></small>
+                </div>
+                <div class="table-command-item__price">
+                  <span><%= money(item[:unit_price_cents]) %>/un</span>
+                  <strong><%= money(item[:total_cents]) %></strong>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+
+          <div class="table-command-card__actions">
+            <button type="button" class="table-command-ghost-btn">
+              <%= ui_icon(:clock) %>
+              <span>Histórico</span>
+            </button>
+            <button type="button" class="table-command-ghost-btn">
+              <%= ui_icon(:user) %>
+              <span>Transferir</span>
+            </button>
+          </div>
+        </article>
+
+        <aside class="table-command-side">
+          <% info = @order.table_command_info %>
+          <article class="table-command-card table-command-info">
+            <header class="table-command-card__header">
+              <small>Informações</small>
+            </header>
+
+            <dl class="table-command-info__list">
+              <div>
+                <dt>Garçom</dt>
+                <dd><%= info[:waiter_name] %></dd>
+              </div>
+              <div>
+                <dt>Abertura</dt>
+                <dd><%= info[:opening_label] %></dd>
+              </div>
+              <div>
+                <dt>Ocupação</dt>
+                <dd class="table-command-occupancy">
+                  <% info[:occupancy_dots].times do |index| %>
+                    <span class="<%= 'is-active' if index < info[:occupancy_active] %>"></span>
+                  <% end %>
+                </dd>
+              </div>
+            </dl>
+          </article>
+
+          <article class="table-command-card table-command-summary">
+            <header class="table-command-card__header">
+              <small>Resumo da Conta</small>
+            </header>
+
+            <div class="table-command-summary__rows">
+              <div>
+                <span>Subtotal Itens</span>
+                <strong><%= money(@order.table_checkout_subtotal_cents) %></strong>
+              </div>
+              <div>
+                <span>Serviço (10%)</span>
+                <strong><%= money(@order.table_checkout_service_fee_cents) %></strong>
+              </div>
+            </div>
+
+            <div class="table-command-summary__total">
+              <span>Total</span>
+              <strong><%= money(@order.table_checkout_total_cents) %></strong>
+            </div>
+
+            <div class="table-command-summary__actions">
+              <%= link_to checkout_admin_order_path(@order), class: "btn btn-success icon-btn justify-content-center" do %>
+                <%= ui_icon(:receipt) %>
+                <span>Fechar Conta</span>
+              <% end %>
+              <button type="button" class="btn btn-outline-brand icon-btn justify-content-center">
+                <%= ui_icon(:list) %>
+                <span>Dividir Pagamento</span>
+              </button>
+            </div>
+          </article>
+
+          <article class="table-command-card table-command-note">
+            <p><%= ui_icon(:user) %> <%= @order.table_command_note %></p>
+          </article>
+        </aside>
+      </section>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,198 @@
+<div class="container-fluid py-4 py-lg-5">
+  <section class="table-checkout-shell fade-in-up">
+    <aside class="table-checkout-sidebar">
+      <div class="table-checkout-brand">
+        <strong>Comand Up</strong>
+        <span><%= l(Time.current, format: "%H:%M") %> • <%= l(Time.current.to_date, format: "%A") %></span>
+      </div>
+
+      <nav class="table-checkout-nav">
+        <%= link_to admin_dashboard_path, class: "" do %>
+          <%= ui_icon(:grid) %>
+          <span>Dashboard</span>
+        <% end %>
+        <span class="is-active">
+          <%= ui_icon(:list) %>
+          <span>Mesas</span>
+        </span>
+        <%= link_to admin_order_path(@order) do %>
+          <%= ui_icon(:receipt) %>
+          <span>Comandas</span>
+        <% end %>
+        <%= link_to menu_admin_order_path(@order) do %>
+          <%= ui_icon(:box) %>
+          <span>Menu</span>
+        <% end %>
+        <%= link_to finance_admin_dashboard_path do %>
+          <%= ui_icon(:chart) %>
+          <span>Relatórios</span>
+        <% end %>
+      </nav>
+
+      <div class="table-checkout-sidebar__footer">
+        <span><%= ui_icon(:user) %> Support</span>
+        <%= button_to admin_logout_path, method: :delete, class: "table-checkout-sidebar__logout" do %>
+          <%= ui_icon(:logout) %>
+          <span>Logout</span>
+        <% end %>
+      </div>
+    </aside>
+
+    <div class="table-checkout-main">
+      <header class="table-checkout-topbar">
+        <div class="table-checkout-topbar__title">
+          <strong>ComandaMaster</strong>
+          <span><%= ui_icon(:map) %> Salão Principal • <%= @order.human_table_label.upcase %></span>
+        </div>
+
+        <div class="table-checkout-topbar__actions">
+          <button type="button" class="table-checkout-icon" aria-label="Notificações"><%= ui_icon(:bell) %></button>
+          <button type="button" class="table-checkout-icon" aria-label="Configurações"><%= ui_icon(:gear) %></button>
+          <span class="table-checkout-avatar"><%= ui_icon(:user) %></span>
+        </div>
+      </header>
+
+      <section class="table-checkout-head">
+        <h1>Fechamento de Conta</h1>
+        <p>
+          <%= @order.human_table_label %> •
+          <%= pluralize(@order.table_checkout_people_count, "pessoa", "pessoas") %> •
+          Permanência: <%= distance_of_time_in_words(0, @order.table_checkout_duration_minutes.minutes, include_seconds: false) %>
+        </p>
+      </section>
+
+      <div class="table-checkout-layout">
+        <article class="table-checkout-card table-consumption-card">
+          <div class="table-consumption-card__head">
+            <div>
+              <small>Resumo do consumo</small>
+              <strong>#<%= @order.checkout_reference %></strong>
+            </div>
+            <span class="table-kitchen-status <%= 'is-pending' unless @order.table_checkout_ready? %>">
+              <%= ui_icon(@order.table_checkout_ready? ? :check : :clock) %>
+              <span><%= @order.table_checkout_status_label %></span>
+            </span>
+          </div>
+
+          <% @order.table_checkout_groups.each do |group| %>
+            <section class="table-consumption-group">
+              <small><%= group[:title] %></small>
+              <ul class="table-consumption-list">
+                <% group[:items].each do |item| %>
+                  <li>
+                    <span class="table-consumption-qty"><%= item[:quantity] %></span>
+                    <div class="table-consumption-copy">
+                      <strong><%= item[:name] %></strong>
+                      <% if item[:note].present? %>
+                        <span><%= item[:note] %></span>
+                      <% end %>
+                    </div>
+                    <span class="table-consumption-price"><%= money(item[:total_cents]) %></span>
+                  </li>
+                <% end %>
+              </ul>
+            </section>
+          <% end %>
+        </article>
+
+        <div class="table-checkout-side">
+          <%= form_with url: close_table_admin_order_path(@order), method: :post, scope: :checkout, local: true, class: "table-checkout-card table-close-card" do |f| %>
+            <section class="table-close-card__section">
+              <small>Ajustes da conta</small>
+
+              <div class="table-adjustment-list">
+                <div class="table-adjustment-row">
+                  <span>Subtotal consumo</span>
+                  <strong><%= money(@order.table_checkout_subtotal_cents) %></strong>
+                </div>
+
+                <div class="table-adjustment-row table-adjustment-highlight">
+                  <div class="table-adjustment-copy">
+                    <%= ui_icon(:check) %>
+                    <span>
+                      Taxa de serviço (10%)
+                      <small>Opcional nessa operação</small>
+                    </span>
+                  </div>
+                  <strong><%= money(@order.table_checkout_service_fee_cents) %></strong>
+                </div>
+
+                <div class="table-adjustment-row">
+                  <div class="table-adjustment-copy">
+                    <%= ui_icon(:receipt) %>
+                    <span>Desconto fidelidade (5%)</span>
+                  </div>
+                  <strong>- <%= money(@order.table_checkout_discount_cents) %></strong>
+                </div>
+              </div>
+
+              <div class="table-total-box">
+                <div>
+                  <span>Total Final</span>
+                </div>
+                <div>
+                  <strong><%= money(@order.table_checkout_total_cents) %></strong>
+                  <span><%= money(@order.table_checkout_average_per_person_cents) %> por pessoa</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="table-close-card__section">
+              <small>Método de pagamento</small>
+
+              <div class="table-payment-methods">
+                <% @payment_methods.each_with_index do |method, index| %>
+                  <div class="table-payment-option">
+                    <%= f.radio_button :payment_method, method[:key], checked: index.zero?, id: "payment-method-#{method[:key]}" %>
+                    <%= f.label "payment_method_#{method[:key]}", for: "payment-method-#{method[:key]}" do %>
+                      <%= ui_icon(method[:icon]) %>
+                      <span><%= method[:label] %></span>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </section>
+
+            <div class="table-close-card__actions">
+              <%= f.button type: :submit, class: "btn btn-brand icon-btn", disabled: !@order.table_checkout_ready? do %>
+                <%= ui_icon(:lock) %>
+                <span>Finalizar e Liberar Mesa</span>
+              <% end %>
+            </div>
+
+            <a href="#" class="table-close-card__print">
+              <%= ui_icon(:receipt) %>
+              <span>Imprimir Extrato de Conferência</span>
+            </a>
+          <% end %>
+        </div>
+      </div>
+
+      <section class="table-metrics-row">
+        <article class="table-checkout-card table-metrics-card">
+          <span class="table-metrics-card__icon"><%= ui_icon(:user) %></span>
+          <div class="table-metrics-card__copy">
+            <small>Garçom responsável</small>
+            <strong><%= current_admin&.name || "Equipe do salão" %></strong>
+          </div>
+        </article>
+
+        <article class="table-checkout-card table-metrics-card">
+          <span class="table-metrics-card__icon"><%= ui_icon(:clock) %></span>
+          <div class="table-metrics-card__copy">
+            <small>Tempo de mesa</small>
+            <strong><%= @order.table_checkout_duration_minutes %> minutos</strong>
+          </div>
+        </article>
+
+        <article class="table-checkout-card table-metrics-card">
+          <span class="table-metrics-card__icon"><%= ui_icon(:utensils) %></span>
+          <div class="table-metrics-card__copy">
+            <small>Total de itens</small>
+            <strong><%= @order.table_checkout_item_count %> produtos registrados</strong>
+          </div>
+        </article>
+      </section>
+    </div>
+  </section>
+</div>

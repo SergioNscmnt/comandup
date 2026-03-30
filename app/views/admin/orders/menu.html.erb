@@ -1,0 +1,144 @@
+<div class="container-fluid py-4 py-lg-5">
+  <section class="table-menu-shell fade-in-up">
+    <aside class="table-checkout-sidebar">
+      <div class="table-checkout-brand">
+        <strong>The Silent Maitre D'</strong>
+        <span><%= l(Time.current, format: "%H:%M") %> • <%= l(Time.current.to_date, format: "%A") %></span>
+      </div>
+
+      <nav class="table-checkout-nav">
+        <%= link_to admin_dashboard_path do %>
+          <%= ui_icon(:grid) %>
+          <span>Dashboard</span>
+        <% end %>
+        <%= link_to checkout_admin_order_path(@order) do %>
+          <%= ui_icon(:list) %>
+          <span>Mesas</span>
+        <% end %>
+        <%= link_to admin_order_path(@order) do %>
+          <%= ui_icon(:receipt) %>
+          <span>Comandas</span>
+        <% end %>
+        <span class="is-active">
+          <%= ui_icon(:box) %>
+          <span>Menu</span>
+        </span>
+        <%= link_to finance_admin_dashboard_path do %>
+          <%= ui_icon(:chart) %>
+          <span>Relatórios</span>
+        <% end %>
+      </nav>
+
+      <div class="table-command-sidebar__cta">
+        <%= link_to products_path, class: "btn btn-brand icon-btn justify-content-center" do %>
+          <%= ui_icon(:plus) %>
+          <span>New Order</span>
+        <% end %>
+      </div>
+
+      <div class="table-checkout-sidebar__footer">
+        <span><%= ui_icon(:user) %> Support</span>
+        <%= button_to admin_logout_path, method: :delete, class: "table-checkout-sidebar__logout" do %>
+          <%= ui_icon(:logout) %>
+          <span>Logout</span>
+        <% end %>
+      </div>
+    </aside>
+
+    <div class="table-menu-main">
+      <header class="table-menu-topbar">
+        <nav class="table-command-topbar__tabs">
+          <span>Dashboard</span>
+          <span>Mesas</span>
+          <span>Comandas</span>
+          <span class="is-active">Menu</span>
+        </nav>
+
+        <div class="table-menu-topbar__search">
+          <%= form_with url: menu_admin_order_path(@order), method: :get, local: true, class: "table-menu-search-form" do %>
+            <%= hidden_field_tag :category_id, @selected_menu_category_id if @selected_menu_category_id.present? %>
+            <span class="table-menu-search-icon"><%= ui_icon(:search) %></span>
+            <%= text_field_tag :q, @menu_query, class: "form-control", placeholder: "Buscar prato ou bebida..." %>
+          <% end %>
+
+          <button type="button" class="table-checkout-icon" aria-label="Notificações"><%= ui_icon(:bell) %></button>
+          <button type="button" class="table-checkout-icon" aria-label="Configurações"><%= ui_icon(:gear) %></button>
+          <span class="table-checkout-avatar"><%= ui_icon(:user) %></span>
+        </div>
+      </header>
+
+      <section class="table-menu-head">
+        <div>
+          <h1>Catálogo de Itens</h1>
+          <p>Selecione os itens para a comanda da <strong><%= @order.human_table_label %></strong></p>
+        </div>
+
+        <div class="table-menu-head__actions">
+          <div class="table-menu-current-total">
+            <small>Itens atuais</small>
+            <strong><%= money(@order.table_menu_current_total_cents) %></strong>
+          </div>
+          <%= link_to admin_order_path(@order), class: "btn btn-brand icon-btn" do %>
+            <%= ui_icon(:lock) %>
+            <span>Finalizar Seleção</span>
+          <% end %>
+        </div>
+      </section>
+
+      <nav class="table-menu-categories">
+        <%= link_to menu_admin_order_path(@order, q: @menu_query.presence), class: "table-menu-category #{'is-active' if @selected_menu_category_id.blank?}" do %>
+          <span>Tudo</span>
+        <% end %>
+        <% @menu_categories.each do |category| %>
+          <%= link_to menu_admin_order_path(@order, category_id: category.id, q: @menu_query.presence), class: "table-menu-category #{'is-active' if @selected_menu_category_id == category.id}" do %>
+            <span><%= category.name %></span>
+          <% end %>
+        <% end %>
+      </nav>
+
+      <section class="table-menu-grid">
+        <% if @menu_products.any? %>
+          <% @menu_products.each do |product| %>
+            <article class="table-menu-card">
+              <div class="table-menu-card__image-wrap">
+                <% if product.image_url.present? %>
+                  <%= image_tag product.image_url, alt: product.name, class: "table-menu-card__image" %>
+                <% else %>
+                  <div class="table-menu-card__image table-menu-card__image--fallback">
+                    <%= ui_icon(:box) %>
+                  </div>
+                <% end %>
+              </div>
+
+              <div class="table-menu-card__meta">
+                <div class="table-menu-card__eyebrow-row">
+                  <small><%= product.category.name.upcase %></small>
+                  <span><%= money(product.price_cents) %></span>
+                </div>
+                <h2><%= product.name %></h2>
+                <p><%= product.description.presence || "Descrição do item indisponível." %></p>
+              </div>
+
+              <%= button_to add_menu_item_admin_order_path(@order, product_id: product.id, category_id: @selected_menu_category_id.presence, q: @menu_query.presence),
+                            method: :post,
+                            class: "table-menu-card__action" do %>
+                <%= ui_icon(:plus) %>
+                <span>Adicionar</span>
+              <% end %>
+            </article>
+          <% end %>
+        <% else %>
+          <article class="table-menu-card table-menu-card--empty">
+            <div class="table-menu-card__meta">
+              <div class="table-menu-card__eyebrow-row">
+                <small>Catálogo</small>
+              </div>
+              <h2>Nenhum item encontrado</h2>
+              <p>Ajuste a busca ou troque a categoria para continuar montando a comanda.</p>
+            </div>
+          </article>
+        <% end %>
+      </section>
+    </div>
+  </section>
+</div>

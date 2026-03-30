@@ -1,5 +1,19 @@
 module Admin
   module DashboardsHelper
+    def dashboard_table_state_class(state)
+      case state.to_sym
+      when :occupied then "is-occupied"
+      when :attention then "is-attention"
+      else "is-free"
+      end
+    end
+
+    def dashboard_minutes_label(minutes)
+      return "0 min" if minutes.to_i <= 0
+
+      "#{minutes.to_i} min"
+    end
+
     def dashboard_mode_color(mode)
       case mode.to_s
       when "delivery" then "#0ea5a4"

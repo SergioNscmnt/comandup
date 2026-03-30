@@ -83,4 +83,39 @@ RSpec.describe Order, type: :model do
 
     expect(Order.open_queue).to eq([old_received, newer_in_production])
   end
+
+  it "extracts numeric dashboard key from table number" do
+    order = build_order(order_type: :table, table_number: "Mesa 12", customer: nil)
+
+    expect(order.dashboard_table_key).to eq(12)
+  end
+
+  it "flags ready orders waiting too long as dashboard attention" do
+    order = build_order(
+      order_type: :table,
+      table_number: "Mesa 4",
+      customer: nil,
+      status: :ready,
+      ready_at: 6.minutes.ago
+    )
+
+    expect(order.attention_for_table_dashboard?).to be(true)
+  end
+
+  it "builds checkout totals for the table" do
+    order = Order.create!(
+      status: :ready,
+      order_type: :table,
+      table_number: "Mesa 4",
+      subtotal_cents: 10000,
+      discount_cents: 500,
+      total_cents: 9500,
+      delivery_fee_cents: 0,
+      service_token: SecureRandom.hex(16)
+    )
+
+    expect(order.table_checkout_service_fee_cents).to eq(1000)
+    expect(order.table_checkout_total_cents).to eq(10500)
+    expect(order.table_checkout_ready?).to be(true)
+  end
 end

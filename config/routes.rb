@@ -60,8 +60,12 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :orders, only: [] do
+    resources :orders, only: [:show] do
       member do
+        get :checkout
+        get :menu
+        post :add_menu_item
+        post :close_table
         post :start_production
         post :finish
         post :mark_ready

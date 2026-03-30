@@ -1,5 +1,6 @@
 module Admin
   class DashboardMetricsService
+    DEFAULT_TABLES = 10
     PERIODS = {
       "day" => -> { 1.day.ago.beginning_of_day },
       "week" => -> { 1.week.ago.beginning_of_day },
@@ -9,11 +10,12 @@ module Admin
     }.freeze
     COMPLETED_STATUSES = %w[ready delivered].freeze
 
-    def initialize(period:, order_type:, product_id: nil, scenario: {})
+    def initialize(period:, order_type:, product_id: nil, scenario: {}, table_state: nil)
       @period = PERIODS.key?(period) ? period : "month"
       @order_type = Order.order_types.key?(order_type) ? order_type : nil
       @product_id = product_id.to_i.positive? ? product_id.to_i : nil
       @scenario_input = normalize_scenario_input(scenario || {})
+      @table_state = %w[all occupied free].include?(table_state) ? table_state : "all"
     end
 
     def call
@@ -57,6 +59,7 @@ module Admin
         financials: financials,
         by_mode: metrics_by_mode(relation),
         trend: daily_trend(completed_orders),
+        table_dashboard: build_table_dashboard,
         alerts: alerts(
           cancel_rate: percentage(canceled_count, total_count),
           operating_margin_percent: financials[:operating_margin_percent],
@@ -446,6 +449,143 @@ module Admin
 
     def truthy?(value)
       value.to_s == "1" || value.to_s.casecmp("true").zero?
+    end
+
+    def build_table_dashboard
+      table_orders = Order
+        .where(order_type: :table)
+        .includes(:order_items, :customer)
+        .order(created_at: :desc, id: :desc)
+
+      grouped = table_orders.group_by(&:dashboard_table_key).reject { |key, _| key.blank? }
+      total_tables = [DEFAULT_TABLES, grouped.keys.max.to_i].max
+      now = Time.current
+
+      cards = (1..total_tables).map do |number|
+        build_table_card(number:, orders: grouped[number] || [], reference_time: now)
+      end
+
+      active_cards = cards.select { |card| card[:occupied] }
+      pending_orders = grouped.values.flatten.select(&:active_for_table_dashboard?)
+
+      {
+        selected_state: @table_state,
+        filters: [
+          { key: "all", label: "Todas", count: cards.size },
+          { key: "occupied", label: "Ocupadas", count: cards.count { |card| card[:occupied] } },
+          { key: "free", label: "Livres", count: cards.count { |card| card[:state] == :free } }
+        ],
+        totals: {
+          total_tables: total_tables,
+          occupied_tables: active_cards.size,
+          free_tables: cards.count { |card| card[:state] == :free },
+          attention_tables: cards.count { |card| card[:state] == :attention },
+          average_minutes: average_table_minutes(active_cards),
+          total_open_cents: active_cards.sum { |card| card[:current_total_cents] },
+          pending_tickets: pending_orders.size
+        },
+        kitchen: {
+          average_wait_minutes: average_wait_minutes(pending_orders),
+          received_count: pending_orders.count(&:received?),
+          in_production_count: pending_orders.count(&:in_production?),
+          ready_count: pending_orders.count(&:ready?)
+        },
+        tables: filter_table_cards(cards)
+      }
+    end
+
+    def build_table_card(number:, orders:, reference_time:)
+      active_orders = orders.select(&:active_for_table_dashboard?)
+      latest_order = active_orders.max_by(&:created_at) || orders.max_by(&:created_at)
+
+      if active_orders.empty?
+        return {
+          number: number,
+          label: format("Mesa %02d", number),
+          state: :free,
+          occupied: false,
+          state_label: "Livre",
+          elapsed_minutes: 0,
+          elapsed_label: "--:--",
+          current_total_cents: 0,
+          ticket_count: 0,
+          summary: "Mesa disponível para abrir comanda.",
+          note: nil,
+          customer_name: nil,
+          action_label: "Abrir Comanda"
+        }
+      end
+
+      attention = active_orders.any? { |order| order.attention_for_table_dashboard?(reference_time:) }
+      current_total_cents = active_orders.sum(&:total_cents)
+      latest_elapsed_minutes = latest_order.dashboard_elapsed_minutes(reference_time:)
+      latest_elapsed_label = minutes_to_clock(latest_elapsed_minutes)
+      latest_status = attention ? :attention : :occupied
+
+      {
+        number: number,
+        label: format("Mesa %02d", number),
+        state: latest_status,
+        occupied: true,
+        state_label: attention ? "Atenção" : "Ocupada",
+        elapsed_minutes: latest_elapsed_minutes,
+        elapsed_label: latest_elapsed_label,
+        current_total_cents: current_total_cents,
+        ticket_count: active_orders.size,
+        summary: table_summary(active_orders),
+        note: table_note(active_orders, latest_order, reference_time:),
+        customer_name: latest_order&.customer&.name,
+        action_label: "Ver fila",
+        order_id: latest_order&.id
+      }
+    end
+
+    def table_summary(active_orders)
+      if active_orders.any?(&:in_production?)
+        "#{active_orders.count(&:in_production?)} pedido(s) em preparo"
+      elsif active_orders.any?(&:received?)
+        "#{active_orders.count(&:received?)} pedido(s) aguardando cozinha"
+      elsif active_orders.all?(&:ready?)
+        "Todos os pedidos prontos para servir"
+      else
+        "#{active_orders.size} ticket(s) em aberto"
+      end
+    end
+
+    def table_note(active_orders, latest_order, reference_time:)
+      return "Pedido pronto aguardando fechamento" if active_orders.any? { |order| order.ready? && order.ready_at.present? && order.ready_at <= 5.minutes.ago }
+      return "Tempo acima do ETA em #{latest_order.dashboard_elapsed_minutes(reference_time:) - latest_order.eta_minutes} min" if latest_order.eta_minutes.present? && latest_order.dashboard_elapsed_minutes(reference_time:) > latest_order.eta_minutes
+      return "Ticket atual: #{latest_order.human_status}" if latest_order.present?
+
+      nil
+    end
+
+    def filter_table_cards(cards)
+      case @table_state
+      when "occupied"
+        cards.select { |card| card[:occupied] }
+      when "free"
+        cards.select { |card| card[:state] == :free }
+      else
+        cards
+      end
+    end
+
+    def average_table_minutes(cards)
+      return 0 if cards.empty?
+
+      (cards.sum { |card| card[:elapsed_minutes] } / cards.size.to_f).round
+    end
+
+    def average_wait_minutes(orders)
+      return 0 if orders.empty?
+
+      (orders.sum { |order| order.dashboard_elapsed_minutes } / orders.size.to_f).round
+    end
+
+    def minutes_to_clock(minutes)
+      total_minutes = minutes.to_i
+      format("%02d:%02d", total_minutes / 60, total_minutes % 60)
     end
 
     def percentage(part, whole)

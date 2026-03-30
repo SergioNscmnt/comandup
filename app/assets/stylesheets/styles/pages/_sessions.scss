@@ -1,3 +1,18 @@
 .auth-card {
   max-width: 560px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 249, 250, 0.92));
+}
+
+.auth-card hr {
+  border-color: rgba(24, 33, 43, 0.08);
+}
+
+.auth-card .input-group .btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.auth-card .small {
+  font-weight: 700;
 }

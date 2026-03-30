@@ -30,11 +30,13 @@ module Admin
         period: params[:period],
         order_type: params[:order_type],
         product_id: params[:product_id],
-        scenario: scenario_params
+        scenario: scenario_params,
+        table_state: params[:table_state]
       ).call
       @screen_query = {
         period: @metrics[:period],
-        order_type: @metrics[:selected_order_type]
+        order_type: @metrics[:selected_order_type],
+        table_state: @metrics.dig(:table_dashboard, :selected_state)
       }.compact
     end
 
